@@ -25,7 +25,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/ChetanSingh673/multibranch_pipeline_ecommerce.git'
+                git branch: 'main', url: 'https://github.com/ChetanSingh673/MicroService-TravelBooking.git'
             }
         }
 
@@ -112,7 +112,7 @@ pipeline {
 
                         git add main_branch_code/k8s-hostbased-https/deployment.yaml
                         git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
-                        git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/$GIT_USERNAME/multibranch_pipeline_ecommerce.git main
+                        git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/$GIT_USERNAME/MicroService-TravelBooking.git main
                         """
                     }
                 }
