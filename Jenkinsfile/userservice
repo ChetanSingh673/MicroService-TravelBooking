@@ -10,7 +10,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "chetansingh673/multibranch-flask-app"
+        IMAGE_NAME = "chetansingh673/travel-booking-service"
         GIT_USER   = "ChetanSingh673"
         GIT_EMAIL  = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner' 
