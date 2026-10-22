@@ -31,10 +31,12 @@ pipeline {
 
         stage("SonarQube Analysis") {
             steps {
+              dir('microservicecode/user-service') {
                 withSonarQubeEnv('sonar-server') {
                     sh ''' $SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectName=Ecommerce \
                         -Dsonar.projectKey=Ecommerce '''
+                   } 
                 }
             }
         }
@@ -51,22 +53,26 @@ pipeline {
         
         stage("Trivy File Scan") {
             steps {
+              dir('microservicecode/user-service') { 
                 sh "trivy fs . > trivyfs.txt"
-            }
+               }
+           }
         }
         
         stage('Build and Push Image') {
             when { branch 'main' }
             steps {
+              dir('microservicecode/user-service') { 
                 script {
                     env.IMAGE_TAG = "build-${BUILD_NUMBER}"
 
                     withCredentials([string(credentialsId: 'dockerhub-creds', variable: 'dockerpwd')]) {                       
                         sh """
-                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} microservicecode/user-service/
+                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                         echo "$dockerpwd" | docker login -u chetansingh673 --password-stdin
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         """
+                       }
                     }
                 }
             }
@@ -74,6 +80,7 @@ pipeline {
 
         stage("Trivy Scan Image") {
             steps {
+              dir('microservicecode/user-service') { 
                 script {
                     sh """
                     echo "Running Trivy scan on ${IMAGE_NAME}:${IMAGE_TAG}"
@@ -86,6 +93,7 @@ pipeline {
                     # Fail build if HIGH/CRITICAL vulnerabilities found
                     # trivy image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG} || true
                     """
+                  }
                 }
             }
         }
