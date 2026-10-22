@@ -63,7 +63,7 @@ pipeline {
 
                     withCredentials([string(credentialsId: 'dockerhub-creds', variable: 'dockerpwd')]) {                       
                         sh """
-                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} main_branch_code
+                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} microservicecode/user-service/
                         echo "$dockerpwd" | docker login -u chetansingh673 --password-stdin
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         """
@@ -108,7 +108,7 @@ pipeline {
                         git checkout main
                         git reset --hard origin/main
 
-                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" main_branch_code/k8s-hostbased-https/deployment.yaml
+                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" microservicecode/k8s/user-service-deployment.yaml
 
                         git add main_branch_code/k8s-hostbased-https/deployment.yaml
                         git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
