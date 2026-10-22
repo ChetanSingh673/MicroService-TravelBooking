@@ -17,4 +17,4 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 COPY --from=build /app/booking-service .
 EXPOSE 3003
-CMD ["./booking-service"]
+CMD ["./microservicecode/booking-service"]
