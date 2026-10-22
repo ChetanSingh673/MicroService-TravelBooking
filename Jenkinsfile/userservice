@@ -13,7 +13,11 @@ pipeline {
         IMAGE_NAME = "chetansingh673/travel-booking-service"
         GIT_USER   = "ChetanSingh673"
         GIT_EMAIL  = "chetan.singh673@gmail.com"
-        SCANNER_HOME = tool 'sonar-scanner' 
+        SCANNER_HOME = tool 'sonar-scanner'
+        SERVICE_DIR  = 'microservicecode/user-service'
+        MANIFEST     = 'microservicecode/k8s/user-service-deployment.yaml'
+        SONAR_PROJECT_KEY = 'travel-user-service'
+        SONAR_PROJECT_NAME = 'travel-user-service' 
     }
     
     stages {
@@ -31,11 +35,11 @@ pipeline {
 
         stage("SonarQube Analysis") {
             steps {
-              dir('microservicecode/user-service') {
+              dir("${SERVICE_DIR}") {
                 withSonarQubeEnv('sonar-server') {
                     sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName=travel-userservice \
-                        -Dsonar.projectKey=travel-userservice '''
+                        -Dsonar.projectName="$SONAR_PROJECT_NAME" \
+                        -Dsonar.projectKey="$SONAR_PROJECT_KEY" '''
                    } 
                 }
             }
@@ -53,7 +57,7 @@ pipeline {
         
         stage("Trivy File Scan") {
             steps {
-              dir('microservicecode/user-service') { 
+              dir("${SERVICE_DIR}") { 
                 sh "trivy fs . > trivyfs.txt"
                }
            }
@@ -62,7 +66,7 @@ pipeline {
         stage('Build and Push Image') {
             when { branch 'main' }
             steps {
-              dir('microservicecode/user-service') { 
+              dir("${SERVICE_DIR}") { 
                 script {
                     env.IMAGE_TAG = "build-${BUILD_NUMBER}"
 
@@ -80,7 +84,7 @@ pipeline {
 
         stage("Trivy Scan Image") {
             steps {
-              dir('microservicecode/user-service') { 
+              dir("${SERVICE_DIR}") { 
                 script {
                     sh """
                     echo "Running Trivy scan on ${IMAGE_NAME}:${IMAGE_TAG}"
@@ -116,9 +120,9 @@ pipeline {
                         git checkout main
                         git reset --hard origin/main
 
-                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" microservicecode/k8s/user-service-deployment.yaml
+                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" "$MANIFEST"
 
-                        git add microservicecode/k8s/user-service-deployment.yaml
+                        git add "$MANIFEST"
                         git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
                         git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/$GIT_USERNAME/MicroService-TravelBooking.git main
                         """
@@ -129,7 +133,7 @@ pipeline {
     }
   post {
     always {
-      dir('src/user-service') {
+      dir("${SERVICE_DIR}") {
         script {
             echo "========== EMAIL NOTIFICATION START =========="
             echo "Build Status: ${currentBuild.currentResult}"
