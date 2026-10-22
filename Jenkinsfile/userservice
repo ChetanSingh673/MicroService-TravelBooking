@@ -34,8 +34,8 @@ pipeline {
               dir('microservicecode/user-service') {
                 withSonarQubeEnv('sonar-server') {
                     sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName=userservice \
-                        -Dsonar.projectKey=userservice '''
+                        -Dsonar.projectName=travel-userservice \
+                        -Dsonar.projectKey=travel-userservice '''
                    } 
                 }
             }
