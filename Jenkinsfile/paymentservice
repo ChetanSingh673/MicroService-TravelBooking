@@ -188,7 +188,7 @@ pipeline {
             emailext(
                 subject: "Pipeline ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <h2>Jenkins CI/CD Pipeline Status</h2>
+                    <h2>Payment Jenkins CI/CD Pipeline Status</h2>
 
                     <p><b>Project:</b> ${env.JOB_NAME}</p>
                     <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
