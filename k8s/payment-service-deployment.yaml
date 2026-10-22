@@ -15,13 +15,14 @@ spec:
       labels:
         app: payment-service
     spec:
-      - name: payment-service
-        image: chetansingh673/travel-payment-service:latest
-        imagePullPolicy: Always
-        ports:
-          - containerPort: 3004
-        envForm:
-          - configMapRef:
-              name: payment-service-config
-          - SecretRef:
-              name: payment-service-secret          
+      containers:
+        - name: payment-service
+          image: chetansingh673/travel-payment-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3004
+          envForm:
+            - configMapRef:
+                name: payment-service-config
+            - SecretRef:
+                name: payment-service-secret          
