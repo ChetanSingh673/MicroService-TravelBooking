@@ -129,7 +129,7 @@ pipeline {
     }
   post {
     always {
-      dir('src/paymentservice') {
+      dir('src/user-service') {
         script {
             echo "========== EMAIL NOTIFICATION START =========="
             echo "Build Status: ${currentBuild.currentResult}"
