@@ -3,6 +3,7 @@ pipeline {
 
      tools {
         jdk 'jdk21'
+        go 'go'
     }
 
     options {
@@ -10,7 +11,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "chetansingh673/travel-booking-service"
+        IMAGE_NAME = "chetansingh673/travel-user-service"
         GIT_USER   = "ChetanSingh673"
         GIT_EMAIL  = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner'
@@ -30,6 +31,49 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/ChetanSingh673/MicroService-TravelBooking.git'
+            }
+        }
+
+        stage('Verify Go Environment') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh '''
+                        go version
+                        go env GOMOD
+                        test -f go.mod
+                    '''
+                }
+            }
+        }
+
+        stage('Download Dependencies') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh '''
+                        go mod download
+                        go mod verify
+                    '''
+                }
+            }
+        }
+
+        stage('Go Unit Tests') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh '''
+                        go test ./...
+                    '''
+                }
+            }
+        }
+
+        stage('Build Go Application') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh '''
+                        CGO_ENABLED=0 go build -o app .
+                    '''
+                }
             }
         }
 
