@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service-deployment 
+  namespace: travel-booking
+  labels:
+    app: notification-service
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      - name: notification-service
+        image: chetansingh673/travel-notification-service:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 3005
+        envFrom:
+          - configMapRef:
+              name: notification-service-config
+          - secretRef:
+              name: notification-service-secret

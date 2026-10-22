@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service-deployment
+  namespace: travel-booking
+  labels:
+    app: booking-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking-service 
+  template: 
+    metadata:
+      labels:
+        app: booking-service    
+    spec:
+      containers:
+        - name: booking-service 
+          image: chetansingh673/travel-booking-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3003     
+          envFrom:
+            - configMapRef:
+                name: booking-service-config
+            - secretRef:
+                name: booking-service-secret

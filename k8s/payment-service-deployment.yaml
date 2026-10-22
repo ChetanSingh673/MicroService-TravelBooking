@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service-deployment
+  namespace: travel-booking
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:  
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      - name: payment-service
+        image: chetansingh673/travel-payment-service:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 3004
+        envForm:
+          - configMapRef:
+              name: payment-service-config
+          - SecretRef:
+              name: payment-service-secret          

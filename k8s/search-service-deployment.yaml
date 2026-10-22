@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service-deployment
+  namespace: travel-booking
+  labels:
+    app: search-service  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-service
+  template:
+    selector:
+      labels:
+        app: search-service
+    spec:
+      - name: search-service
+        image: chetansingh673/travel-search-service:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 3002
+        envFrom:
+          - configMapRef:
+              name: search-service-config
+          - secretRef:
+              name: search-service-secret                  
