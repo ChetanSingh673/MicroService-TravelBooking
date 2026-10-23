@@ -6,7 +6,7 @@ metadata:
 data:
   NOD_ENV: "production"
   PORT: "3003"
-  DB_HOST: "postgres"
+  DB_HOST: "postgres-service"  # This need to be same as in the postgres service name
   DB_PORT: "5432"
   DB_SSLMODE: "disable"
   USER_SERVICE_URL: "http://user-service-service:3001"

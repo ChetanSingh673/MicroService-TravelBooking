@@ -7,6 +7,7 @@ data:
   NODE_ENV: "production"
   PORT: "3002"
   DB_PORT: "5432"
+  DB_HOST: "postgres-service" # This need to be same as in the postgres service name
   DB_SSLMODE: "disable"
   REDIS_HOST: "redis"
   REDIS_PORT: "6379"  
