@@ -11,7 +11,7 @@ spec:
     matchLabels:
       app: search-service
   template:
-    selector:
+    metadata:
       labels:
         app: search-service
     spec:
