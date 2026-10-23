@@ -75,15 +75,16 @@ pipeline {
                 }
             }
         }
-
-        stage('Build Go Application') {
-            steps {
-                dir("${SERVICE_DIR}") {
-                    sh '''
-                        CGO_ENABLED=0 go build -o app .
-                    '''
-                }
-            }
+        
+        stage('Build React Application') {
+          steps {
+            dir('microservicecode/frontend') {
+               sh '''
+                  set -eu
+                  npm run build
+                '''
+              }
+           }
         }
 
         stage("SonarQube Analysis") {
