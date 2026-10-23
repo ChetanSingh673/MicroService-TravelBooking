@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: payment-service
-          image: chetansingh673/travel-payment-service:latest
+          image: chetansingh673/travel-payment-service:build-1
           imagePullPolicy: Always
           ports:
             - containerPort: 3004
