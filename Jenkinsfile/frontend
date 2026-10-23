@@ -81,7 +81,7 @@ pipeline {
             dir('microservicecode/frontend') {
                sh '''
                   set -eu
-                  npm run build
+                  CI=false npm run build
                 '''
               }
            }
