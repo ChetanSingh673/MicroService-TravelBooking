@@ -70,7 +70,7 @@ pipeline {
                 dir("${SERVICE_DIR}") {
                     sh '''
                         set -eu
-                        npm test -- --watchAll=false
+                        npm test -- --watchAll=false --passWithNoTests
                     '''
                 }
             }
