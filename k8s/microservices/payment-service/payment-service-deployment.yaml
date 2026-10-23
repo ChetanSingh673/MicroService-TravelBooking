@@ -24,5 +24,5 @@ spec:
           envFrom:
             - configMapRef:
                 name: payment-service-config
-            - SecretRef:
+            - secretRef:
                 name: payment-service-secret          
