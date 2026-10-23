@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
        - name: notification-service
-         image: chetansingh673/travel-notification-service:latest
+         image: chetansingh673/travel-notification-service:build-1
          imagePullPolicy: Always
          ports:
            - containerPort: 3005
