@@ -10,4 +10,4 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: blog-ebs-sc # This is the storage class name
+  storageClassName: postgres-ebs-sc # This is the storage class name
