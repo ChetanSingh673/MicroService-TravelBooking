@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: cloudmella.store
+    - host: frontend.cloudmella.store
       http:
         paths:
           - path: /
