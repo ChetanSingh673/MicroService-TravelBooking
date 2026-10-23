@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: chetansingh673/travel-user-service:latest 
+          image: chetansingh673/travel-user-service:build-1
           imagePullPolicy: Always        
           ports:
             - containerPort: 3001
