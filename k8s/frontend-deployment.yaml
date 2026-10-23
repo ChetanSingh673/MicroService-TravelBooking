@@ -16,7 +16,7 @@ spec:
         app: frontend
     spec:
       - name: frontend
-        image: chetansingh673/travel-frontend:latest
+        image: chetansingh673/travel-frontend:build-4
         imagePullPolicy: Always         
         ports:
           - containerPort: 80
