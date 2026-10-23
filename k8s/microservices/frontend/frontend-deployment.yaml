@@ -15,6 +15,7 @@ spec:
       labels:
         app: frontend
     spec:
+     containers: 
       - name: frontend
         image: chetansingh673/travel-frontend:build-4
         imagePullPolicy: Always         
