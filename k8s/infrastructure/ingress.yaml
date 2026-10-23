@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: travel-booking-ingress
+  name: travel-ingress
   namespace: travel-booking
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
@@ -20,7 +20,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: frontend-service
                 port:
                   number: 80
     - host: user.cloudmella.store
