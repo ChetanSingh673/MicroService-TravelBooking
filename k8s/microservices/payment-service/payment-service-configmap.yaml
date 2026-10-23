@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadta:
-  name: payment-service-secret
+  name: payment-service-config
   namespace: travel-booking
 data:
   NODE_ENV: "production"
