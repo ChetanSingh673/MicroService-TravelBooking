@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: travel-booking
   labels: 
-    travel-booking-ns
+    app: travel-booking-ns
   
