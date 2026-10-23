@@ -4,7 +4,6 @@ pipeline {
      tools {
         jdk 'jdk21'
         go 'go'
-        nodejs "node26"
     }
 
     options {
@@ -46,17 +45,24 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Download Dependencies') {
-            steps {
-                dir("${SERVICE_DIR}") {
-                    sh '''
-                        go mod download
-                        go mod verify
-                    '''
-                }
+          steps {
+            dir("${SERVICE_DIR}") {
+              sh '''
+                 set -eu
+
+                 go mod download
+                 go mod tidy
+                 go mod download
+                 go mod verify
+
+                 test -f go.sum
+             '''
             }
+          } 
         }
+
 
         stage('Go Unit Tests') {
             steps {
