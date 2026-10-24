@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +8,7 @@ metadata:
     app: user-service
 spec:
   replicas: 1
-  selector: 
+  selector:
     matchLabels:
       app: user-service
   template:
@@ -18,15 +19,15 @@ spec:
       containers:
         - name: user-service
           image: chetansingh673/travel-user-service:build-1
-          imagePullPolicy: Always        
+          imagePullPolicy: Always
           ports:
             - containerPort: 3001
 
           resources:
-            limits:
+            requests:
               cpu: 100m
               memory: 128Mi
-            requests:
+            limits:
               cpu: 500m
               memory: 512Mi
 
@@ -35,22 +36,21 @@ spec:
               path: /health
               port: 3001
             initialDelaySeconds: 30
-            periodSeconds: 10 
+            periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
 
-          readinessProbe:    
+          readinessProbe:
             httpGet:
               path: /health
               port: 3001
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 3
-            failureThreshold: 3  
+            failureThreshold: 3
 
           envFrom:
             - configMapRef:
                 name: user-service-config
             - secretRef:
                 name: user-service-secret
-                     
