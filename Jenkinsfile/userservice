@@ -17,7 +17,7 @@ pipeline {
         GIT_EMAIL  = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner'
         SERVICE_DIR  = 'microservicecode/user-service'
-        MANIFEST     = 'k8s/user-service-deployment.yaml'
+        MANIFEST     = 'k8s/microservices/user-service/user-service-deployment.yaml'
         SONAR_PROJECT_KEY = 'travel-user-service'
         SONAR_PROJECT_NAME = 'travel-user-service' 
     }

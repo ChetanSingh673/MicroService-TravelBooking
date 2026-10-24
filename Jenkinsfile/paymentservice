@@ -17,7 +17,7 @@ pipeline {
         GIT_EMAIL  = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner'
         SERVICE_DIR  = 'microservicecode/payment-service'
-        MANIFEST     = 'k8s/payment-service-deployment.yaml'
+        MANIFEST     = 'k8s/microservices/payment-service/payment-service-deployment.yaml'
         SONAR_PROJECT_KEY = 'travel-payment-service'
         SONAR_PROJECT_NAME = 'travel-payment-service' 
     }

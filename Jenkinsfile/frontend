@@ -16,7 +16,7 @@ pipeline {
         GIT_EMAIL = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner'
         SERVICE_DIR = 'microservicecode/frontend'
-        MANIFEST = 'k8s/frontend-deployment.yaml'
+        MANIFEST = 'k8s/microservices/frontend/frontend-deployment.yaml'
         SONAR_PROJECT_KEY = 'travel-frontend'
         SONAR_PROJECT_NAME = 'travel-frontend'
     }
