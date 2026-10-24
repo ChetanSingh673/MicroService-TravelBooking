@@ -22,12 +22,15 @@ spec:
           image: postgres:15-alpine
           ports:
             - containerPort: 5432
+
           envFrom:
             - secretRef:
                 name: postgres-secret
+
           env:
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
+
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
@@ -43,7 +46,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3  
+            failureThreshold: 3
 
           readinessProbe:
             exec:
@@ -60,7 +63,7 @@ spec:
         - name: initdb
           configMap:
             name: postgres-initdb
-            
+
         - name: postgres-data
           persistentVolumeClaim:
-             claimName: postgres-ebs-pvc  # This is the pvc name 
+            claimName: postgres-ebs-pvc
