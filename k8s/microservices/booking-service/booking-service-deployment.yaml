@@ -30,7 +30,7 @@ spec:
               memory: 512Mi
           livenessProbe:        # The liveness probe checks whether the application is still running properly.     
             httpGet:            # sends an HTTP request to the application
-              path: /health-test     # checks the /health endpoint
+              path: /health     # checks the /health endpoint
               port: 3003        # sends the request to port 3003   
             initialDelaySeconds: 30  # waits 30 seconds before starting the first check
             periodSeconds: 10        # checks every 10 seconds  
@@ -39,7 +39,7 @@ spec:
          
           readinessProbe:       # The readiness probe checks whether the application is ready to receive traffic. 
             httpGet:            # sends an HTTP request to the application
-              path: /health-test     # checks the /health endpoint
+              path: /health     # checks the /health endpoint
               port: 3003        # sends the request to port 3003   
             initialDelaySeconds: 10  # The first check begins after 10 seconds.
             periodSeconds: 5         # Kubernetes checks every 5 seconds. 
