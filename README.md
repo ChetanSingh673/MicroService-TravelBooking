@@ -1,4 +1,4 @@
-# Micro-Services Traveling Website — Setup Guide
+# MicroService Travel Booking Website — Setup Guide
 
 This project implements an end-to-end DevOps CI/CD pipeline using a Jenkins Multibranch Pipeline, GitHub Pull Requests, Docker, Docker Hub, Kubernetes, Argo CD, and Prometheus/Grafana for monitoring.
 
