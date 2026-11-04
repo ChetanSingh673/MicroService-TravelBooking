@@ -222,17 +222,13 @@ k8s/
 * [Jenkins](#jenkins)
 * [Docker](#docker)
 * [Trivy](#trivy-vulnerability-scanner)
-* [Prometheus](#prometheus)
-* [Node Exporter](#node-exporter)
-* [Grafana](#grafana)
 * [Jenkins Plugins to Install](#jenkins-plugins-to-install)
 * [Jenkins Credentials to Store](#jenkins-credentials-to-store)
 * [Jenkins Tools Configuration](#jenkins-tools-configuration)
 * [Jenkins System Configuration](#jenkins-system-configuration)
 * [EKS ALB Ingress Kubernetes Setup Guide](#eks-alb-ingress-kubernetes-setup-guide)
-* [Monitor Kubernetes with Prometheus](#monitor-kubernetes-with-prometheus)
+* [Prometheus, Node Exporter, Grafana Setup Guide](prometheus,-node-exporter-Grafana-Setup-Guide)
 * [Installing Argo CD](#installing-argo-cd)
-* [Notes and Recommendations](#notes-and-recommendations)
 
 ---
 
