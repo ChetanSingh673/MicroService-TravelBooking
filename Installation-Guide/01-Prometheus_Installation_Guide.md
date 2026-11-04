@@ -67,5 +67,6 @@ sudo systemctl enable prometheus
 **Step 6: Verify the Setup**
 Open your browser and navigate to:
 
-'http://ip-address:9090'
-You should see the Prometheus dashboard running. 🎉
+`http://ip-address:9090`
+
+You should see the Prometheus dashboard running.
