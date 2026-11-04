@@ -4,7 +4,7 @@ metadata:
   name: booking-service-config
   namespace: travel-booking
 data:
-  NOD_ENV: "production"
+  NODE_ENV: "production"
   PORT: "3003"
   DB_HOST: "postgres-service"  # This need to be same as in the postgres service name
   DB_PORT: "5432"
