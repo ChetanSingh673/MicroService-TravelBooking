@@ -1,24 +1,25 @@
-## Prometheus Installation Guide
-This guide walks you through installing Prometheus on a Linux-based system.
+## Prometheus Installation Guide 
+This guide walks you through installing Prometheus on a Linux-based AMD64 system such as Intel or AMD x86_64 servers and desktops.
 
-## Step 1: Create Prometheus User and Directory
+**Step 1: Create Prometheus User and Folders**
+
 Create a dedicated non-login user and the necessary directories for configuration and data.
 ```bash
 sudo useradd --no-create-home --shell /bin/false prometheus
 sudo mkdir -p /etc/prometheus /var/lib/prometheus
 sudo chown prometheus:prometheus /var/lib/prometheus
 ```
+**Step 2: Download and Extract Prometheus**
 
-## Step 2: Download and Extract Prometheus
-Fetch the ARM64 binary archive and unpack it.
+Fetch the AMD64 binary archive and unpack it.
 ```bash
 cd /tmp
-wget https://github.com/prometheus/prometheus/releases/download/v3.4.1/prometheus-3.4.1.linux-arm64.tar.gz
-tar -xvf prometheus-3.4.1.linux-arm64.tar.gz
-cd prometheus-3.4.1.linux-arm64
+wget https://github.com/prometheus/prometheus/releases/download/v3.4.1/prometheus-3.4.1.linux-amd64.tar.gz
+tar -xvf prometheus-3.4.1.linux-amd64.tar.gz
+cd prometheus-3.4.1.linux-amd64
 ```
+**Step 3: Install Binaries and Example Configuration**
 
-## Step 3: Install Binaries and Example Configuration
 Move Prometheus files into system-wide locations and prepare configuration folders.
 ```bash
 sudo mv prometheus promtool /usr/local/bin/
@@ -27,8 +28,8 @@ sudo mv prometheus.yml /etc/prometheus/
 sudo mkdir -p /etc/prometheus/consoles /etc/prometheus/console_libraries
 sudo chown -R prometheus:prometheus /etc/prometheus
 ```
+**Step 4: Create systemd Service**
 
-## Step 4: Create systemd Service
 Create a systemd service file so Prometheus can run in the background and start on boot.
 ```bash
 sudo vim /etc/systemd/system/prometheus.service
@@ -55,18 +56,16 @@ WantedBy=multi-user.target
 ```
 Save and close the file.
 
-## Step 5: Start and Enable Prometheus
+**Step 5: Start and Enable Prometheus**
+
 Enable the Prometheus service so it starts on boot and run it now.
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl start prometheus
 sudo systemctl enable prometheus
 ```
-
-## Step 6: Verify the Setup
+**Step 6: Verify the Setup**
 Open your browser and navigate to:
-```bash
-http://localhost:9090
-```
-You should see the Prometheus dashboard running.
 
+'http://ip-address:9090'
+You should see the Prometheus dashboard running. 🎉
