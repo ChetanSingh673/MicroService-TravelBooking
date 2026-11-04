@@ -566,7 +566,7 @@ sudo eksctl utils associate-iam-oidc-provider --cluster chetan-cluster2026 --app
 ```
 ████████████████████████████████████████████████████████████████████████████████████████
 
-## Install and Configure AWS Load Balancer Controller on Amazon EKS
+# Install and Configure AWS Load Balancer Controller on Amazon EKS
 
 
 **1. Create IAM Policy for AWS Load Balancer Controller**
