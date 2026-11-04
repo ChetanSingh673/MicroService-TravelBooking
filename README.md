@@ -6,17 +6,9 @@ The main focus of this project is to showcase an end-to-end DevOps and DevSecOps
 
 > **Note:** Replace all `<VERSION>`, `<your-server-ip>`, `<jenkins-ip>`, `<sonar-ip-address>`, and similar placeholders with your actual values.
 
-## Microservices
-|Service | Language |	Port |	Database |	Purpose|
-| :---   | :---     | :--- |  :---     |  :---   |    
-|Frontend |	React.js |	80 |	-	 |User interface|
-|User Service |	Go |	3001 |	userdb |	Registration, login, JWT auth |
-|Search Service |	Go |	3002 |	searchdb |	Flight & hotel search|
-|Booking Service |	Go |	3003 |	bookingdb |	Create & manage bookings|
-|Payment Service |	Go |	3004 |	paymentdb |	Payment processing|
-|Notification Service |	Go |	3005 |	notificationdb |	Booking notifications|
-|PostgreSQL |	-	 |5432 |	5 DBs |	Data storage (StatefulSet)|
+# Architecture Diagram
 
+![Architecture Diagram](screenshot/Architecture_diagram_travelBooking.png)
 
 ## End-to-End Microservices CI/CD & Deployment Flow
 ```bash
@@ -133,8 +125,18 @@ The main focus of this project is to showcase an end-to-end DevOps and DevSecOps
                             (Monitoring)
 ```
 
-## Project Structure
+## Microservices
+|Service | Language |	Port |	Database |	Purpose|
+| :---   | :---     | :--- |  :---     |  :---   |    
+|Frontend |	React.js |	80 |	-	 |User interface|
+|User Service |	Go |	3001 |	userdb |	Registration, login, JWT auth |
+|Search Service |	Go |	3002 |	searchdb |	Flight & hotel search|
+|Booking Service |	Go |	3003 |	bookingdb |	Create & manage bookings|
+|Payment Service |	Go |	3004 |	paymentdb |	Payment processing|
+|Notification Service |	Go |	3005 |	notificationdb |	Booking notifications|
+|PostgreSQL |	-	 |5432 |	5 DBs |	Data storage (StatefulSet)|
 
+## Project Structure
 
 ```bash
 MicroService-TravelBooking/
@@ -826,4 +828,3 @@ eksctl delete cluster --name chetan-cluster2026 --region us-west-2
 ```
 # Screenshots
 
-![Architecture Diagram](screenshots/Architecture_diagram_travelBooking.png)
