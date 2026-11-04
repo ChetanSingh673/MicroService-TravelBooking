@@ -788,6 +788,7 @@ Validate config:
 promtool check config /etc/prometheus/prometheus.yml
 sudo systemctl restart  prometheus.service
 ```
+████████████████████████████████████████████████████████████████████████████████████████
 
 # Installing Argo CD on the eks cluster
 Docs: [https://www.eksworkshop.com/docs/automation/gitops/argocd/access_argocd](https://www.eksworkshop.com/docs/automation/gitops/argocd/access_argocd)
@@ -816,6 +817,8 @@ sudo kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.
 sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 ---
+
+
 
 # Delete the EKS Cluster
 
