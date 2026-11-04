@@ -83,11 +83,6 @@ Add to `sudo vim /etc/prometheus/prometheus.yml`:
     metrics_path: /prometheus
     static_configs:
       - targets: ["<jenkins-ip>:8080"]
-
-   - job_name: 'k8s'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: ['node1Ip:9100']
 ```
      
 Validate config:
