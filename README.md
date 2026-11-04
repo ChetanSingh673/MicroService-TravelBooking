@@ -620,7 +620,7 @@ kubectl get deployment -n kube-system aws-load-balancer-controller
 ```
 ████████████████████████████████████████████████████████████████████████████████████████
 
-# Prometheus, Node Exporter, Grafana & Kubernetes Monitoring Setup Guide
+# Prometheus, Node Exporter, Grafana Setup Guide
 
 **Prometheus**
 Official downloads: [https://prometheus.io/download/](https://prometheus.io/download/)
@@ -772,29 +772,7 @@ Create the Prometheus Datasource: [http://promethues-ip:9090](http://promethues-
 * jenkins 9964 Docs: https://grafana.com/grafana/dashboards/9964-jenkins-performance-and-health-overview/
 * kubernetes 17119 Docs: https://grafana.com/grafana/dashboards/18283-kubernetes-dashboard/
 
-## Monitor Kubernetes with Prometheus
 
-**Install Node Exporter using Helm:**
-```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-kubectl create namespace prometheus-node-exporter
-helm install prometheus-node-exporter prometheus-community/prometheus-node-exporter --namespace prometheus-node-exporter
-```
-Add to `/etc/prometheus/prometheus.yml:`
-```bash
-  - job_name: 'k8s'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: ['node1Ip:9100']
-```
-
-Docs: [https://grafana.com/grafana/dashboards/17119-kubernetes-eks-cluster-prometheus/](https://grafana.com/grafana/dashboards/17119-kubernetes-eks-cluster-prometheus/) ID FOR EKS 17119
-
-Validate config:
-```bash
-promtool check config /etc/prometheus/prometheus.yml
-sudo systemctl restart  prometheus.service
-```
 ████████████████████████████████████████████████████████████████████████████████████████
 
 # Installing Argo CD on the eks cluster
@@ -824,8 +802,6 @@ sudo kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.
 sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 ---
-
-
 
 # Delete the EKS Cluster
 
