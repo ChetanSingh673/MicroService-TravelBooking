@@ -622,31 +622,48 @@ kubectl get deployment -n kube-system aws-load-balancer-controller
 
 # Prometheus, Node Exporter, Grafana Setup Guide
 
-**Prometheus**
-Official downloads: [https://prometheus.io/download/](https://prometheus.io/download/)
+## Prometheus Installation Guide 
+This guide walks you through installing Prometheus on a Linux-based AMD64 system such as Intel or AMD x86_64 servers and desktops.
 
-**Generic install steps:**
+**Official downloads**: [https://prometheus.io/download/](https://prometheus.io/download/)
 
+**Step 1: Create Prometheus User and Folders**
+
+Create a dedicated non-login user and the necessary directories for configuration and data.
 ```bash
-# Create a prometheus user
-sudo useradd --system --no-create-home --shell /usr/sbin/nologin prometheus
-
-wget -O prometheus.tar.gz "https://github.com/prometheus/prometheus/releases/download/v3.5.0/prometheus-3.5.0.linux-amd64.tar.gz"
-tar -xvf prometheus.tar.gz
-cd prometheus-*/
-
-sudo mkdir -p /data /etc/prometheus
-sudo mv prometheus promtool /usr/local/bin/
-sudo mv consoles/ console_libraries/ /etc/prometheus/
-sudo mv prometheus.yml /etc/prometheus/prometheus.yml
-
-sudo chown -R prometheus:prometheus /etc/prometheus /data
+sudo useradd --no-create-home --shell /bin/false prometheus
+sudo mkdir -p /etc/prometheus /var/lib/prometheus
+sudo chown prometheus:prometheus /var/lib/prometheus
 ```
+**Step 2: Download and Extract Prometheus**
 
-**Systemd service** (`sudo vim /etc/systemd/system/prometheus.service`):
+Fetch the AMD64 binary archive and unpack it.
+```bash
+cd /tmp
+wget https://github.com/prometheus/prometheus/releases/download/v3.4.1/prometheus-3.4.1.linux-amd64.tar.gz
+tar -xvf prometheus-3.4.1.linux-amd64.tar.gz
+cd prometheus-3.4.1.linux-amd64
+```
+**Step 3: Install Binaries and Example Configuration**
+
+Move Prometheus files into system-wide locations and prepare configuration folders.
+```bash
+sudo mv prometheus promtool /usr/local/bin/
+sudo chmod +x /usr/local/bin/prometheus /usr/local/bin/promtool
+sudo mv prometheus.yml /etc/prometheus/
+sudo mkdir -p /etc/prometheus/consoles /etc/prometheus/console_libraries
+sudo chown -R prometheus:prometheus /etc/prometheus
+```
+**Step 4: Create systemd Service**
+
+Create a systemd service file so Prometheus can run in the background and start on boot.
+```bash
+sudo vim /etc/systemd/system/prometheus.service
+```
+Paste the following into the file:
 ```bash
 [Unit]
-Description=Prometheus
+Description=Prometheus Monitoring
 Wants=network-online.target
 After=network-online.target
 
@@ -654,74 +671,35 @@ After=network-online.target
 User=prometheus
 Group=prometheus
 Type=simple
-Restart=on-failure
-RestartSec=5s
 ExecStart=/usr/local/bin/prometheus \
   --config.file=/etc/prometheus/prometheus.yml \
-  --storage.tsdb.path=/data \
+  --storage.tsdb.path=/var/lib/prometheus \
   --web.console.templates=/etc/prometheus/consoles \
-  --web.console.libraries=/etc/prometheus/console_libraries \
-  --web.listen-address=0.0.0.0:9090
+  --web.console.libraries=/etc/prometheus/console_libraries
 
 [Install]
 WantedBy=multi-user.target
 ```
+Save and close the file.
 
-# Enable & start:
+**Step 5: Start and Enable Prometheus**
+
+Enable the Prometheus service so it starts on boot and run it now.
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now prometheus
 sudo systemctl start prometheus
-sudo systemctl status prometheus
+sudo systemctl enable prometheus
 ```
+**Step 6: Verify the Setup**
+Open your browser and navigate to:
 
-Access: [http://ip-address:9090](http://ip-address:9090)
+`http://ip-address:9090`
 
----
+You should see the Prometheus dashboard running.
 
-# Node Exporter
-Docs: [https://prometheus.io/download/#node_exporter](https://prometheus.io/download/#node_exporter)
+**Step 7: Prometheus scrape config:**
 
-```bash
-sudo useradd --system --no-create-home --shell /usr/sbin/nologin node_exporter
-
-wget -O node_exporter.tar.gz "https://github.com/prometheus/node_exporter/releases/download/v1.9.1/node_exporter-1.9.1.linux-amd64.tar.gz"
-tar -xvf node_exporter.tar.gz
-sudo mv node_exporter-*/node_exporter /usr/local/bin/
-rm -rf node_exporter*
-```
-
-Systemd service: (`sudo vim /etc/systemd/system/node_exporter.service`)
-
-```bash
-[Unit]
-Description=Node Exporter
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-User=node_exporter
-Group=node_exporter
-Type=simple
-Restart=on-failure
-ExecStart=/usr/local/bin/node_exporter --collector.logind
-
-[Install]
-WantedBy=multi-user.target
-```
-
-# Enable & start:
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now node_exporter
-sudo systemctl start node_exporter
-sudo systemctl status node_exporter
-```
-
-# Prometheus scrape config:
-
-Add to `sudo vim /etc/prometheus/prometheus.yml:`
-
+Add to `sudo vim /etc/prometheus/prometheus.yml`:
 ```bash
   - job_name: "node_exporter"
     static_configs:
@@ -732,38 +710,166 @@ Add to `sudo vim /etc/prometheus/prometheus.yml:`
     static_configs:
       - targets: ["<jenkins-ip>:8080"]
 ```
-
+     
 Validate config:
-
 ```bash
 promtool check config /etc/prometheus/prometheus.yml
 sudo systemctl restart prometheus
 ```
 ---
 
-# Grafana
-Docs: [https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/](https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/)
+## Node Exporter Installation Guide (Linux AMD64)
+This guide walks you through installing Node Exporter on a Linux-based AMD64 system such as x86_64 servers or virtual machines.
 
+**Docs**: [https://prometheus.io/download/#node_exporter](https://prometheus.io/download/#node_exporter)
+
+**Step 1: Create Node Exporter User**
+
+Create a dedicated non-login user for running the exporter.
 ```bash
-sudo apt-get install -y apt-transport-https software-properties-common wget
-
-sudo mkdir -p /etc/apt/keyrings/
-wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
-
-echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
-
-sudo apt-get update
-sudo apt-get install -y grafana
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now grafana-server
-sudo systemctl start grafana-server
-sudo systemctl status grafana-server
+sudo useradd --no-create-home --shell /bin/false node_exporter
 ```
 
-Access: [http://ip-address:3000](http://ip-address:3000)
+**Step 2: Download and Extract Node Exporter**
+
+Fetch the AMD64 binary archive and unpack it.
+```bash
+cd /tmp
+wget https://github.com/prometheus/node_exporter/releases/download/v1.9.1/node_exporter-1.9.1.linux-amd64.tar.gz
+tar -xvf node_exporter-1.9.1.linux-amd64.tar.gz
+cd node_exporter-1.9.1.linux-amd64
+```
+**Step 3: Install Binary**
+
+Move the binary to your system's executable path and assign ownership.
+```bash
+sudo mv node_exporter /usr/local/bin/
+sudo chown node_exporter:node_exporter /usr/local/bin/node_exporter
+```
+**Step 4: Create systemd Service**
+
+Create a systemd service to run Node Exporter as a background process.
+```bash
+sudo vim /etc/systemd/system/node_exporter.service
+```
+Paste the following content:
+```bash
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+```
+Save and close the file.
+
+**Step 5: Start and Enable Node Exporter**
+
+Start the service and enable it at boot.
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start node_exporter
+sudo systemctl enable node_exporter
+```
+**Step 6: Verify the Setup**
+Open your browser and go to:
+
+`http://ip-address:9100/metrics`
+
+You should see a live stream of metrics generated by Node Exporter.
+
+---
+
+## Grafana Installation Guide via APT Repository
+This guide walks you through installing Grafana on a Ubuntu Linux via APT Repository.
+
+**Docs**: [https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/](https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/)
+
+**1. Add the Grafana APT key**
+```bash
+sudo apt-get install -y apt-transport-https software-properties-common wget
+wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+```
+**2. Add the Grafana repository**
+```bash
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+```
+**3. Update package list**
+```bash
+sudo apt-get update
+```
+**4. Install Grafana**
+```bash
+sudo apt-get install -y grafana
+```
+**5. Start and enable Grafana**
+```bash
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
+```
+Grafana is now running as a systemd service and will auto-start on boot.
+
+**6. Access Grafana**
+Open your browser and visit:
+```bash
+http://ip-address:3000
+```
+Default credentials:
+
+Username: ` admin `
+
+Password: ` admin `  (you'll be prompted to change it at first login)
 
 Create the Prometheus Datasource: [http://promethues-ip:9090](http://promethues-ip:9090)
+
+---
+
+## Connect Grafana to Prometheus Step-by-Step
+Great — let’s wire up Grafana with Prometheus so you can start visualizing all those juicy metrics!
+
+**1. Log in to Grafana**
+Go to http://localhost:3000 in your browser.
+Default credentials:
+
+* **Username**: admin
+* **Password**: admin (you'll be asked to change it if you didn't already)
+
+**2. Add Prometheus as a Data Source**
+1. In the left sidebar, click ⚙️ **“Connections” > “Add new connection”**
+2. Click **“Search Prometheus in Data sources”**
+3. Choose **Prometheus** from the list
+
+**3. Configure Prometheus Connection**
+In the **Connection** section:
+
+* **Prometheus server URL**
+```bash
+http://localhost:9090
+```
+* Leave all other settings as default (for a local setup)
+
+Click **“Save & test”** — you should get a green checkmark ✅ confirming it's working.
+
+**4. Create Your First Dashboard Panel**
+1. Click the + icon in the sidebar → choose **“Dashboards”**
+
+2. Click **“NEW”**
+
+3. Enter a query like:
+```bash
+rate(prometheus_engine_query_duration_seconds[1m])
+```
+4. Choose a visualization type: **graph, gauge**, etc.
+5. Click **Apply**
+
+Boom — you’ve got real data visualized from Prometheus in Grafana!
 
 ---
 
