@@ -714,8 +714,12 @@ sudo aws eks update-kubeconfig --name chetan-cluster2026 --region us-west-2
 ```bash
 sudo eksctl utils associate-iam-oidc-provider --cluster chetan-cluster2026 --approve
 ```
+████████████████████████████████████████████████████████████████████████████████████████
 
-# 9. Create IAM Policy for AWS Load Balancer Controller
+## Install and Configure AWS Load Balancer Controller on Amazon EKS
+
+
+**1. Create IAM Policy for AWS Load Balancer Controller**
 
 New policy link: [AWS EKS LBC Policy](https://docs.aws.amazon.com/eks/latest/userguide/lbc-manifest.html)
 
@@ -727,7 +731,7 @@ sudo aws iam create-policy \
   --policy-document file://iam_policy.json
 ```
 
-# 10. Create IAM Service Account
+**2. Create IAM Service Account**
 
 Replace <ACCOUNT_ID> with your AWS account ID.
 ```bash
@@ -741,7 +745,7 @@ sudo eksctl create iamserviceaccount \
   --approve
 ```
 
-# 11. Install AWS Load Balancer Controller via Helm
+**3. Install AWS Load Balancer Controller via Helm**
 ```bash
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update eks
@@ -764,6 +768,7 @@ helm list -A
 ```bash
 kubectl get deployment -n kube-system aws-load-balancer-controller
 ```
+████████████████████████████████████████████████████████████████████████████████████████
 
 ## Monitor Kubernetes with Prometheus
 
