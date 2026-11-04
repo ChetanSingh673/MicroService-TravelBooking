@@ -91,13 +91,13 @@ The main focus of this project is to showcase an end-to-end DevOps and DevSecOps
           |                      |                      |
           ▼                      ▼                      ▼
     Frontend Pods          Go Microservices       PostgreSQL StatefulSet
-                           ┌───────────────┐              |
-                           │ User Service  │              ├── userdb
-                           │ Search Service│              ├── searchdb
-                           │ Booking Service              ├── bookingdb
+                           ┌────────────────┐              |
+                           │ User Service   │              ├── userdb
+                           │ Search Service │              ├── searchdb
+                           │ Booking Service│              ├── bookingdb
                            │ Payment Service│              ├── paymentdb
                            │ Notification   │              └── notificationdb
-                           └───────────────┘
+                           └────────────────┘
                                   |
                                   |
                                   ▼
