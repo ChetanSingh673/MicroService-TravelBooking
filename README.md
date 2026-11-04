@@ -227,7 +227,7 @@ k8s/
 * [Jenkins Tools Configuration](#jenkins-tools-configuration)
 * [Jenkins System Configuration](#jenkins-system-configuration)
 * [EKS ALB Ingress Kubernetes Setup Guide](#eks-alb-ingress-kubernetes-setup-guide)
-* [Prometheus, Node Exporter & Grafana Setup Guide](prometheus-node-exporter-grafana-setup-guide)
+* [Prometheus, Node Exporter & Grafana Setup Guide](#prometheus-node-exporter-grafana-setup-guide)
 * [Installing Argo CD](#installing-argo-cd)
 
 ---
