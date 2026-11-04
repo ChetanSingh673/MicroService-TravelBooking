@@ -3,12 +3,12 @@ This guide walks you through installing Grafana on a Ubuntu Linux via APT Reposi
 
 ## 1. Add the Grafana APT key
 ```bash
-sudo apt-get install -y software-properties-common wget
-wget -q -O - https://apt.grafana.com/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/grafana.gpg
+sudo apt-get install -y apt-transport-https software-properties-common wget
+wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
 ```
 ## 2. Add the Grafana repository
 ```bash
-echo "deb [signed-by=/usr/share/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 ```
 ## 3. Update package list
 ```bash
@@ -28,7 +28,7 @@ Grafana is now running as a systemd service and will auto-start on boot.
 ## 6. Access Grafana
 Open your browser and visit:
 ```bash
-http://localhost:3000
+http://ip-address:3000
 ```
 Default credentials:
 
