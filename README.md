@@ -18,61 +18,119 @@ The main focus of this project is to showcase an end-to-end DevOps and DevSecOps
 |PostgreSQL |	-	 |5432 |	5 DBs |	Data storage (StatefulSet)|
 
 
-## End-to-End Deployment Flow
+## End-to-End Microservices CI/CD & Deployment Flow
 ```bash
-Developer
-│
-├── Initial Push --------------------> Main Branch
-│
-├── Pull Latest Main ---> FeatureA ---> PR ---> Code Review ---> Merge to Main (GitHub UI)
-│
-└── Pull Latest Main ---> FeatureB ---> PR ---> Code Review ---> Merge to Main (GitHub UI)
-                                                     │
-                                                     ▼
-                                      Jenkins Multibranch Pipeline (CI)
-                                                     │
-                         ┌───────────────────────────┴──────────────────────────┐
-                         │                                                      │
-                         ▼                                                      ▼
-          SonarQube Analysis & Quality Gate                       Trivy File System Scan
-             (Code Quality & Security)                           (Workspace Security Check)
-                         │                                                      │
-                         └───────────────────────────┬──────────────────────────┘
-                                                     │
-                                                     ▼
-                                  Build Docker Image & Push to Docker Hub
-                                                     │
-                                                     ▼
-                                Trivy Container Image Scan
-                                  (Vulnerability & CVE Check)
-                                                     │
-                                                     ▼
-                                Update Image Tag in Git
-                                   (K8s Manifest Repo)
-                                                     │
-                                                     ▼
-                                             Argo CD (CD)
-                                                     │
-                                                     ▼
-                                           AWS EKS Deployment
-                                                     │
-                                                     ▼
-                                              Route 53 DNS
-                                                     │
-                                                     ▼
-                                         ecomm.cloudmella.com
-                                          (Live Blog Platform)
-                                                     │
-                                                     ▼
-                                      HTTPS (SSL/TLS via AWS
-                                         Certificate Manager)
-                                                     │
-                                                     ▼
-                                         Live Application
-                                   (https://ecomm.cloudmella.store)
-                                                     │
-                                                     ▼
-                                   Prometheus + Grafana Monitoring
+                              Developer
+                                  |
+                                  ▼
+                         Initial Code Push
+                                  |
+                                  ▼
+                         GitHub Main Branch
+                                  |
+                                  ▼
+                    Jenkins CI/CD (6 Separate Jobs)
+                                  |
+       ┌──────────────────────────┼──────────────────────────┐
+       |                          |                          |
+       ▼                          ▼                          ▼
+ Frontend Pipeline          User Service Pipeline      Search Service Pipeline
+ (React.js / Node.js)       (Go / Port 3001)            (Go / Port 3002)
+       |                          |                          |
+       └──────────────────────────┼──────────────────────────┘
+                                  |
+       ┌──────────────────────────┼──────────────────────────┐
+       |                          |                          |
+       ▼                          ▼                          ▼
+ Booking Service Pipeline   Payment Service Pipeline   Notification Pipeline
+ (Go / Port 3003)           (Go / Port 3004)            (Go / Port 3005)
+       |                          |                          |
+       └──────────────────────────┼──────────────────────────┘
+                                  |
+                                  ▼
+                     SERVICE-SPECIFIC CI PIPELINE
+                                  |
+                                  ▼
+                         Checkout Source Code
+                                  |
+                                  ▼
+                    Dependency Installation / Download
+                         (NPM / Go Modules)
+                                  |
+                                  ▼
+                            Unit Testing
+                         (NPM / Go Test)
+                                  |
+                                  ▼
+                       SonarQube Code Analysis
+                                  |
+                                  ▼
+                            Quality Gate
+                                  |
+                                  ▼
+                       Trivy File System Scan
+                                  |
+                                  ▼
+                        Docker Image Build
+                                  |
+                                  ▼
+                        Trivy Image Scan
+                                  |
+                                  ▼
+                      Push Image to Docker Hub
+                                  |
+                                  ▼
+                   Update Kubernetes Image Tag
+                       (Service Deployment YAML)
+                                  |
+                                  ▼
+                      Push Updated YAML to GitHub
+                                  |
+                                  ▼
+                           Argo CD (GitOps)
+                                  |
+                                  ▼
+                         AWS EKS Cluster
+                                  |
+                                  ▼
+                     Kubernetes Deployments
+                                  |
+          ┌──────────────────────┼──────────────────────┐
+          |                      |                      |
+          ▼                      ▼                      ▼
+    Frontend Pods          Go Microservices       PostgreSQL StatefulSet
+                           ┌───────────────┐              |
+                           │ User Service  │              ├── userdb
+                           │ Search Service│              ├── searchdb
+                           │ Booking Service              ├── bookingdb
+                           │ Payment Service│              ├── paymentdb
+                           │ Notification   │              └── notificationdb
+                           └───────────────┘
+                                  |
+                                  |
+                                  ▼
+                     AWS ALB Ingress Controller
+                                  |
+                    ┌─────────────┴─────────────┐
+                    |                           |
+                    ▼                           ▼
+                Route 53                  AWS Certificate
+                (DNS)                     Manager (ACM)
+                    |                           |
+                    └─────────────┬─────────────┘
+                                  |
+                                  ▼
+                         HTTPS (SSL/TLS)
+                                  |
+                                  ▼
+                         cloudmella.store
+                                  |
+                                  ▼
+                    Travel Booking Application
+                                  |
+                                  ▼
+                       Prometheus + Grafana
+                            (Monitoring)
 ```
 
 ## Table of Contents
