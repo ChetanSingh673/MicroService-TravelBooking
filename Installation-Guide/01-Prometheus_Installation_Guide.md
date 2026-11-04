@@ -70,3 +70,28 @@ Open your browser and navigate to:
 `http://ip-address:9090`
 
 You should see the Prometheus dashboard running.
+
+**Step 7: Prometheus scrape config:**
+
+Add to `sudo vim /etc/prometheus/prometheus.yml`:
+```bash
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["<ip-address>:9100"]
+
+  - job_name: "jenkins"
+    metrics_path: /prometheus
+    static_configs:
+      - targets: ["<jenkins-ip>:8080"]
+
+   - job_name: 'k8s'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['node1Ip:9100']
+```
+     
+Validate config:
+```bash
+promtool check config /etc/prometheus/prometheus.yml
+sudo systemctl restart prometheus
+```
