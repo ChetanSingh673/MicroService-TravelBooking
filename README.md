@@ -4,7 +4,6 @@ TravelBooking is a cloud-native microservices-based travel application where use
 
 The main focus of this project is to showcase an end-to-end DevOps and DevSecOps lifecycle on Amazon Web Services (AWS), using services such as Amazon EKS, EC2, IAM, EBS, and Route 53, along with tools like Jenkins, Docker, SonarQube, Trivy, Prometheus, Grafana, and Argo CD.
 
-
 > **Note:** Replace all `<VERSION>`, `<your-server-ip>`, `<jenkins-ip>`, `<sonar-ip-address>`, and similar placeholders with your actual values.
 
 ## End-to-End Deployment Flow
