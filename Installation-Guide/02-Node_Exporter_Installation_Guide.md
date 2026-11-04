@@ -2,11 +2,14 @@
 This guide walks you through installing Node Exporter on a Linux-based AMD64 system such as x86_64 servers or virtual machines.
 
 **Step 1: Create Node Exporter User**
+
 Create a dedicated non-login user for running the exporter.
 ```bash
 sudo useradd --no-create-home --shell /bin/false node_exporter
-```bash
+```
+
 **Step 2: Download and Extract Node Exporter**
+
 Fetch the AMD64 binary archive and unpack it.
 ```bash
 cd /tmp
@@ -15,12 +18,14 @@ tar -xvf node_exporter-1.9.1.linux-amd64.tar.gz
 cd node_exporter-1.9.1.linux-amd64
 ```
 **Step 3: Install Binary**
+
 Move the binary to your system's executable path and assign ownership.
 ```bash
 sudo mv node_exporter /usr/local/bin/
 sudo chown node_exporter:node_exporter /usr/local/bin/node_exporter
 ```
 **Step 4: Create systemd Service**
+
 Create a systemd service to run Node Exporter as a background process.
 ```bash
 sudo nano /etc/systemd/system/node_exporter.service
@@ -44,6 +49,7 @@ WantedBy=multi-user.target
 Save and close the file.
 
 **Step 5: Start and Enable Node Exporter**
+
 Start the service and enable it at boot.
 ```bash
 sudo systemctl daemon-reload
