@@ -32,6 +32,6 @@ http://localhost:3000
 ```
 Default credentials:
 
-Username: ```bash admin ```
+Username: ` admin `
 
-Password: ```bash admin ``` (you'll be prompted to change it at first login)
+Password: ` admin `  (you'll be prompted to change it at first login)
