@@ -1,8 +1,8 @@
 # MicroService Travel Booking Website — Setup Guide
 
-This project implements an end-to-end DevOps CI/CD pipeline using a Jenkins Multibranch Pipeline, GitHub Pull Requests, Docker, Docker Hub, Kubernetes, Argo CD, and Prometheus/Grafana for monitoring.
+TravelBooking is a cloud-native microservices-based travel application where users can search for flights and hotels, make bookings, and process payments — similar to MakeMyTrip or Booking.com.
 
-The project follows a GitOps-based deployment approach, where Jenkins is responsible for the Continuous Integration (CI) process and Argo CD is responsible for Continuous Deployment (CD).
+The main focus of this project is to showcase an end-to-end DevOps and DevSecOps lifecycle on Amazon Web Services (AWS), using services such as Amazon EKS, EC2, IAM, EBS, and Route 53, along with tools like Jenkins, Docker, SonarQube, Trivy, Prometheus, Grafana, and Argo CD.
 
 
 > **Note:** Replace all `<VERSION>`, `<your-server-ip>`, `<jenkins-ip>`, `<sonar-ip-address>`, and similar placeholders with your actual values.
