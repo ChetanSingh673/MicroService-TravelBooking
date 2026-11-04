@@ -133,6 +133,9 @@ The main focus of this project is to showcase an end-to-end DevOps and DevSecOps
                             (Monitoring)
 ```
 
+## Project Structure
+
+
 ```bash
 MicroService-TravelBooking/
 │
