@@ -133,6 +133,82 @@ The main focus of this project is to showcase an end-to-end DevOps and DevSecOps
                             (Monitoring)
 ```
 
+```bash
+MicroService-TravelBooking/
+│
+├── Jenkinsfile/
+│   │
+│   ├── frontend
+│   ├── userservice
+│   ├── searchservice
+│   ├── bookingservice
+│   ├── paymentservice
+│   └── notificationservice
+
+|
+k8s/
+│
+├── database/
+│   ├── postgres-initdb-configmap.yaml
+│   ├── postgres-pvc.yaml
+│   ├── postgres-secret.yaml
+│   ├── postgres-service.yaml
+│   ├── postgres-statefulset.yaml
+│   └── postgres-storageclass.yaml
+│
+├── infrastructure/
+│   ├── ingress.yaml
+│   └── namespace.yaml
+│
+└── microservices/
+│    │
+│    ├── booking-service/
+│    │   ├── booking-service-configmap.yaml
+│    │   ├── booking-service-deployment.yaml
+│    │   ├── booking-service-secret.yaml
+│    │   └── booking-service-service.yaml
+│    │
+│    ├── frontend/
+│    │   ├── frontend-deployment.yaml
+│    │   └── frontend-service.yaml
+│    │
+│    ├── notification-service/
+│    │   ├── notification-service-configmap.yaml
+│    │   ├── notification-service-deployment.yaml
+│    │   ├── notification-service-secret.yaml
+│    │   └── notification-service-service.yaml
+│    │
+│    ├── payment-service/
+│    │   ├── payment-service-configmap.yaml
+│    │   ├── payment-service-deployment.yaml
+│    │   ├── payment-service-secret.yaml
+│    │   └── payment-service-service.yaml
+│    │
+│    ├── search-service/
+│    │   ├── search-service-configmap.yaml
+│    │   ├── search-service-deployment.yaml
+│    │   ├── search-service-secret.yaml
+│    │   └── search-service-service.yaml
+│    │
+│    └── user-service/
+│        ├── user-service-configmap.yaml
+│        ├── user-service-deployment.yaml
+│        ├── user-service-secret.yaml
+│        └── user-service-service.yaml
+│
+├── microservicecode/
+│   │
+│   ├── frontend/               # React.js frontend
+│   ├── user-service/           # Go — user management & JWT auth
+│   ├── search-service/         # Go — flight & hotel search with Redis cache 
+│   ├── booking-service/        # Go — booking management
+│   ├── payment-service/        # Go — payment processing
+│   └── notification-service/   # Go — notifications
+|
+└── README.md
+
+```
+
 ## Table of Contents
 
 * [Prerequisites](#prerequisites)
