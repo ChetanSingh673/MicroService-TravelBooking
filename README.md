@@ -389,6 +389,7 @@ trivy --version
 # Jenkins Plugins to Install
 * Email Extension Template Plugin
 * Pipeline: Stage View Plugin
+* GO plugins
 * SonarQube Scanner for Jenkins
 * Prometheus metrics plugin
 * Docker API Plugin
