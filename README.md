@@ -390,6 +390,7 @@ trivy --version
 * Email Extension Template Plugin
 * Pipeline: Stage View Plugin
 * GO plugins
+* NodeJS plugins
 * SonarQube Scanner for Jenkins
 * Prometheus metrics plugin
 * Docker API Plugin
