@@ -4,6 +4,7 @@ metadata:
   name: travel-booking-ingress
   namespace: travel-booking
   annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: travel-booking-alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
