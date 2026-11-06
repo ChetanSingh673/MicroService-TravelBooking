@@ -616,6 +616,39 @@ helm list -A
 ```bash
 kubectl get deployment -n kube-system aws-load-balancer-controller
 ```
+
+---
+
+████████████████████████████████████████████████████████████████████████████████████████
+
+# Installing Argo CD on the eks cluster
+Docs: [https://www.eksworkshop.com/docs/automation/gitops/argocd/access_argocd](https://www.eksworkshop.com/docs/automation/gitops/argocd/access_argocd)
+
+Docs: [https://github.com/argoproj/argo-helm](https://github.com/argoproj/argo-helm)
+
+# Argocd installation via helm chart
+```bash
+sudo helm repo add argo https://argoproj.github.io/argo-helm
+sudo helm repo update
+```
+```bash
+sudo kubectl create namespace argocd 
+sudo helm install argocd argo/argo-cd --namespace argocd
+sudo kubectl get all -n argocd 
+sudo kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}' 
+```
+# Another way to get the loadbalancer of the argocd alb url
+```bash
+sudo apt install jq -y
+
+sudo kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname'
+```
+  Username: admin
+```bash
+sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+
+---
 ████████████████████████████████████████████████████████████████████████████████████████
 
 # Prometheus, Node Exporter, Grafana Setup Guide
@@ -877,35 +910,6 @@ Boom — you’ve got real data visualized from Prometheus in Grafana!
 * jenkins 9964 Docs: https://grafana.com/grafana/dashboards/9964-jenkins-performance-and-health-overview/
 * kubernetes 17119 Docs: https://grafana.com/grafana/dashboards/18283-kubernetes-dashboard/
 
-
-████████████████████████████████████████████████████████████████████████████████████████
-
-# Installing Argo CD on the eks cluster
-Docs: [https://www.eksworkshop.com/docs/automation/gitops/argocd/access_argocd](https://www.eksworkshop.com/docs/automation/gitops/argocd/access_argocd)
-
-Docs: [https://github.com/argoproj/argo-helm](https://github.com/argoproj/argo-helm)
-
-# Argocd installation via helm chart
-```bash
-sudo helm repo add argo https://argoproj.github.io/argo-helm
-sudo helm repo update
-```
-```bash
-sudo kubectl create namespace argocd 
-sudo helm install argocd argo/argo-cd --namespace argocd
-sudo kubectl get all -n argocd 
-sudo kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}' 
-```
-# Another way to get the loadbalancer of the argocd alb url
-```bash
-sudo apt install jq -y
-
-sudo kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname'
-```
-  Username: admin
-```bash
-sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-```
 ---
 
 # Delete the EKS Cluster
