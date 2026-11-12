@@ -637,11 +637,10 @@ sudo helm install argocd argo/argo-cd --namespace argocd
 sudo kubectl get all -n argocd 
 sudo kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}' 
 ```
-# Another way to get the loadbalancer of the argocd alb url
+# Below is the command to get the loadbalancer of the argocd alb url
 ```bash
-sudo apt install jq -y
+sudo kubectl get svc -n argocd
 
-sudo kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname'
 ```
   Username: admin
 ```bash
