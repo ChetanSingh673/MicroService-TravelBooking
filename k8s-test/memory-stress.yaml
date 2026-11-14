@@ -1,0 +1,37 @@
+
+apiVersion: apps/v1                         # Kubernetes API version
+kind: Deployment                            # Defines a Deployment
+metadata:
+  name: memory-stress                       # Deployment name
+  namespace: travel-booking                 # Deployment namespace
+  labels:
+    app: memory-stress                      # Deployment label
+spec:
+  replicas: 1                                # Creates one stress Pod
+  selector:
+    matchLabels:
+      app: memory-stress                    # Selects Pods with this label
+  template:
+    metadata:
+      labels:
+        app: memory-stress                  # Assigns label to the Pod
+    spec:
+      containers:
+        - name: memory-stress-container     # Container name
+          image: polinux/stress-ng          # Image containing stress-ng
+          command: ["stress-ng"]            # Executes stress-ng
+          args:
+            - "--vm"                        # Enables memory stress
+            - "1"                           # Creates one memory worker
+            - "--vm-bytes"
+            - "512M"                          # Allocates approximately 512M
+            - "--vm-keep"                   # Keeps allocated memory during the test
+            - "--timeout"
+            - "600s"                        # Runs for 10 minutes
+          resources:
+            requests:
+              cpu: 100m                     # Requests 0.1 CPU
+              memory: 256Mi                 # Requests 256 MiB memory
+            limits:
+              cpu: 500m                     # Maximum 0.5 CPU
+              memory: 700Mi                # Maximum 700Mi memory
