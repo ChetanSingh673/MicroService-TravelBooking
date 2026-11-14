@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: stress-app
+  name: cpu-memory-stress-app
   namespace: travel-booking
   labels:
     app: cpu-memory-stress-app
