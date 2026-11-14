@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cpu-memory-stress-app
+  name: Node-Cpu-Memory-Stress-app
   namespace: travel-booking
   labels:
-    app: cpu-memory-stress-app
+    app: stress-app
 spec:
   replicas: 1
   selector:

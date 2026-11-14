@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Node-Cpu-Memory-Stress-app
+  namespace: travel-booking
+  labels:
+    app: stress-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stress-app
+  template:
+    metadata:
+      labels:
+        app: stress-app
+    spec:
+      containers:
+        - name: stress-container
+          image: polinux/stress-ng
+          command: ["stress-ng"]
+          args:
+            - "--cpu"
+            - "1"
+            - "--cpu-load"
+            - "70"
+            - "--vm"
+            - "1"
+            - "--vm-bytes"
+            - "128M"
+            - "--timeout"
+            - "600s"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 256Mi
