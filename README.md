@@ -689,7 +689,7 @@ helm pull prometheus-community/kube-prometheus-stack --untar
 **Access Prometheus dashboard**
 
 ```bash
-kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090 &
 ```
 
 **Connect Windows machine to EC2 using SSH tunneling**
@@ -698,16 +698,10 @@ kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 909
 ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 9090:127.0.0.1:9090 ubuntu@15.207.88.137
 ```
 
-The authenticity of host '15.207.88.137 (15.207.88.137)' can't be established.
-ED25519 key fingerprint is SHA256:awYemUTbF9ONRBVRGzgbh73MZ58coYXQlCpSw9V/IB0.
-This key is not known by any other names.
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added '15.207.88.137' (ED25519) to the list of known hosts.
-
 **Access Grafana dashboard**
 
 ```bash
-kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80 &
 
 kubectl get secret monitoring-grafana -n monitoring \
   -o jsonpath="{.data.admin-password}" | base64 -d
