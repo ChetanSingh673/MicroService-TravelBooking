@@ -731,7 +731,7 @@ ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 3000:127.0.0.1:3000 ubuntu
 # Delete the EKS Cluster
 
 ```bash
-eksctl delete cluster --name chetan-cluster2026 --region us-west-2 
+eksctl delete cluster --name chetan-cluster2026 --region ap-south-1 
 ```
 # Screenshots
 
