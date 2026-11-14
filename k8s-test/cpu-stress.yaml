@@ -5,7 +5,7 @@ metadata:
   name: stress-app
   namespace: travel-booking
   labels:
-    app: stress-app
+    app: cpu-memory-stress-app
 spec:
   replicas: 1
   selector:
@@ -24,7 +24,7 @@ spec:
             - "--cpu"
             - "1"
             - "--cpu-load"
-            - "75"
+            - "70"
             - "--vm"
             - "1"
             - "--vm-bytes"
