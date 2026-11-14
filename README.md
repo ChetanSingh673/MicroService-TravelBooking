@@ -653,27 +653,51 @@ sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.dat
 # Installed kube-prometheus-stack using Helm on the EKS cluster
 
 **Add Prometheus Helm repository**
-```bash helm repo add prometheus-community https://prometheus-community.github.io/helm-charts ```
+
+```bash 
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+```
 
 **Updates the local Helm repository index to download the latest available chart information**
-```bashhelm repo update```
+
+```bash
+helm repo update
+```
 
 **Searches for the kube-prometheus-stack Helm chart and displays its available versions**
-```bashhelm search repo prometheus-community/kube-prometheus-stack```
+
+```bash
+helm search repo prometheus-community/kube-prometheus-stack
+```
 
 **Create monitoring namespace**
-```bashkubectl create namespace monitoring```
+
+```bash
+kubectl create namespace monitoring
+```
 
 **Install Prometheus and Grafana**
-```bashhelm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring```
 
-```bashhelm pull prometheus-community/kube-prometheus-stack --untar```
+```bash
+helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring
+```
+
+```bash
+helm pull prometheus-community/kube-prometheus-stack --untar
+```
 
 **Access Prometheus dashboard**
-```bashkubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090```
+
+```bash
+kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+```
 
 **Connect Windows machine to EC2 using SSH tunneling**
-```bashssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 9090:127.0.0.1:9090 ubuntu@15.207.88.137```
+
+```bash
+ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 9090:127.0.0.1:9090 ubuntu@15.207.88.137
+```
+
 The authenticity of host '15.207.88.137 (15.207.88.137)' can't be established.
 ED25519 key fingerprint is SHA256:awYemUTbF9ONRBVRGzgbh73MZ58coYXQlCpSw9V/IB0.
 This key is not known by any other names.
@@ -681,6 +705,7 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added '15.207.88.137' (ED25519) to the list of known hosts.
 
 **Access Grafana dashboard**
+
 ```bash
 kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
 
@@ -690,7 +715,9 @@ echo
 ```
 **Connect Windows machine to EC2 using SSH tunneling**
 
-```bashssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 3000:127.0.0.1:3000 ubuntu@15.207.88.137```
+```bash
+ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 3000:127.0.0.1:3000 ubuntu@15.207.88.137
+```
 
 ---
 
