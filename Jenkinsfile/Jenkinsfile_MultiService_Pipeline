@@ -1,0 +1,428 @@
+
+def services = [
+    [
+        name: 'Frontend',
+        type: 'node',
+        dir: 'microservicecode/frontend',
+        image: 'chetansingh673/travel-frontend',
+        manifest: 'k8s/microservices/frontend/frontend-deployment.yaml',
+        sonar: 'travel-frontend'
+    ],
+    [
+        name: 'Booking Service',
+        type: 'go',
+        dir: 'microservicecode/booking-service',
+        image: 'chetansingh673/travel-booking-service',
+        manifest: 'k8s/microservices/booking-service/booking-service-deployment.yaml',
+        sonar: 'travel-booking-service'
+    ],
+    [
+        name: 'Payment Service',
+        type: 'go',
+        dir: 'microservicecode/payment-service',
+        image: 'chetansingh673/travel-payment-service',
+        manifest: 'k8s/microservices/payment-service/payment-service-deployment.yaml',
+        sonar: 'travel-payment-service'
+    ],
+    [
+        name: 'Search Service',
+        type: 'go',
+        dir: 'microservicecode/search-service',
+        image: 'chetansingh673/travel-search-service',
+        manifest: 'k8s/microservices/search-service/search-service-deployment.yaml',
+        sonar: 'travel-search-service'
+    ],
+    [
+        name: 'User Service',
+        type: 'go',
+        dir: 'microservicecode/user-service',
+        image: 'chetansingh673/travel-user-service',
+        manifest: 'k8s/microservices/user-service/user-service-deployment.yaml',
+        sonar: 'travel-user-service'
+    ],
+    [
+        name: 'Notification Service',
+        type: 'go',
+        dir: 'microservicecode/notification-service',
+        image: 'chetansingh673/travel-notification-service',
+        manifest: 'k8s/microservices/notification-service/notification-service-deployment.yaml',
+        sonar: 'travel-notification-service'
+    ]
+]
+
+pipeline {
+
+    agent any
+
+    tools {
+        jdk 'jdk21'
+        go 'go'
+        nodejs 'node26'
+    }
+
+    options {
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        GIT_EMAIL = 'chetan.singh673@gmail.com'
+        SCANNER_HOME = tool 'sonar-scanner'
+        IMAGE_TAG = "build-${BUILD_NUMBER}"
+    }
+
+    stages {
+
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/ChetanSingh673/MicroService-TravelBooking.git'
+            }
+        }
+
+        // =========================================
+        // STAGE 1: BUILD AND TEST ALL SERVICES
+        // =========================================
+
+        stage('Build and Test All Services') {
+
+            steps {
+                script {
+
+                    services.each { svc ->
+
+                        stage("CI - ${svc.name}") {
+
+                            dir("${svc.dir}") {
+
+                                echo "================================="
+                                echo "Building ${svc.name}"
+                                echo "================================="
+
+                                // FRONTEND BUILD
+
+                                if (svc.type == 'node') {
+
+                                    sh '''
+                                        set -eu
+
+                                        node --version
+                                        npm --version
+
+                                        test -f package.json
+
+                                        if [ -f package-lock.json ]; then
+                                            npm ci
+                                        else
+                                            npm install
+                                        fi
+
+                                        npm test -- --watchAll=false --passWithNoTests
+
+                                        CI=false npm run build
+                                    '''
+
+                                }
+
+                                // GO MICROSERVICES BUILD
+
+                                else {
+
+                                    sh '''
+                                        set -eu
+
+                                        go version
+                                        go env GOMOD
+
+                                        test -f go.mod
+
+                                        go mod download
+                                        go mod tidy
+                                        go mod download
+                                        go mod verify
+
+                                        test -f go.sum
+
+                                        go test ./...
+
+                                        CGO_ENABLED=0 go build -o app .
+                                    '''
+
+                                }
+
+                                // SONARQUBE ANALYSIS
+
+                                withSonarQubeEnv('sonar-server') {
+
+                                    sh """
+                                        \$SCANNER_HOME/bin/sonar-scanner \\
+                                            -Dsonar.projectName="${svc.sonar}" \\
+                                            -Dsonar.projectKey="${svc.sonar}"
+                                    """
+
+                                }
+
+                                // QUALITY GATE
+
+                                timeout(time: 3, unit: 'MINUTES') {
+
+                                    waitForQualityGate(
+                                        abortPipeline: false,
+                                        credentialsId: 'sonar-token'
+                                    )
+
+                                }
+
+                                // TRIVY FILE SCAN
+
+                                sh '''
+                                    set -eu
+                                    trivy fs . > trivyfs.txt
+                                '''
+
+                                echo "${svc.name} CI completed successfully"
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // =========================================
+        // STAGE 2: BUILD AND PUSH ALL DOCKER IMAGES
+        // =========================================
+
+        stage('Build and Push All Docker Images') {
+
+            steps {
+                script {
+
+                    withCredentials([
+                        string(
+                            credentialsId: 'dockerhub-creds',
+                            variable: 'dockerpwd'
+                        )
+                    ]) {
+
+                        sh '''
+                            echo "$dockerpwd" | docker login \
+                                -u chetansingh673 \
+                                --password-stdin
+                        '''
+
+                        services.each { svc ->
+
+                            stage("Docker Build - ${svc.name}") {
+
+                                dir("${svc.dir}") {
+
+                                    env.IMAGE_NAME = svc.image
+
+                                    sh '''
+                                        set -eu
+
+                                        echo "Building ${IMAGE_NAME}:${IMAGE_TAG}"
+
+                                        docker build \
+                                            -t "${IMAGE_NAME}:${IMAGE_TAG}" .
+
+                                        docker push "${IMAGE_NAME}:${IMAGE_TAG}"
+                                    '''
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // =========================================
+        // STAGE 3: TRIVY IMAGE SCAN
+        // =========================================
+
+        stage('Trivy Scan All Docker Images') {
+
+            steps {
+                script {
+
+                    services.each { svc ->
+
+                        stage("Trivy Image Scan - ${svc.name}") {
+
+                            dir("${svc.dir}") {
+
+                                env.IMAGE_NAME = svc.image
+
+                                sh '''
+                                    set -eu
+
+                                    echo "Scanning ${IMAGE_NAME}:${IMAGE_TAG}"
+
+                                    trivy image \
+                                        -f json \
+                                        -o trivy-image.json \
+                                        "${IMAGE_NAME}:${IMAGE_TAG}"
+
+                                    trivy image \
+                                        -f table \
+                                        -o trivy-image.txt \
+                                        "${IMAGE_NAME}:${IMAGE_TAG}"
+                                '''
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // =========================================
+        // STAGE 4: UPDATE ALL KUBERNETES MANIFESTS
+        // =========================================
+
+        stage('Update All Kubernetes Manifests') {
+
+            steps {
+                script {
+
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'github-creds',
+                            usernameVariable: 'GIT_USERNAME',
+                            passwordVariable: 'GIT_TOKEN'
+                        )
+                    ]) {
+
+                        services.each { svc ->
+
+                            stage("Update Manifest - ${svc.name}") {
+
+                                env.IMAGE_NAME = svc.image
+                                env.MANIFEST = svc.manifest
+
+                                sh '''
+                                    set -eu
+
+                                    git config user.name "$GIT_USERNAME"
+                                    git config user.email "$GIT_EMAIL"
+
+                                    git fetch origin
+
+                                    git checkout -B main origin/main
+
+                                    if [ ! -f "$MANIFEST" ]; then
+                                        echo "Manifest not found: $MANIFEST"
+                                        exit 1
+                                    fi
+
+                                    sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" "$MANIFEST"
+
+                                    git add "$MANIFEST"
+
+                                    if ! git diff --cached --quiet; then
+
+                                        git commit -m "Updated ${IMAGE_NAME} to ${IMAGE_TAG}"
+
+                                        git push \
+                                            "https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/ChetanSingh673/MicroService-TravelBooking.git" \
+                                            HEAD:main
+
+                                    else
+                                        echo "No manifest changes detected"
+                                    fi
+                                '''
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    // =========================================
+    // FINAL EMAIL NOTIFICATION
+    // =========================================
+
+    post {
+
+        success {
+
+            emailext(
+                subject: "SUCCESS: Travel Booking CI/CD - Build #${BUILD_NUMBER}",
+
+                body: """
+                    <h2>Travel Booking CI/CD Pipeline Successful</h2>
+
+                    <p><b>Project:</b> ${JOB_NAME}</p>
+                    <p><b>Build Number:</b> ${BUILD_NUMBER}</p>
+                    <p><b>Status:</b> SUCCESS</p>
+                    <p><b>Docker Image Tag:</b> build-${BUILD_NUMBER}</p>
+
+                    <h3>Services Built Successfully</h3>
+
+                    <ul>
+                        <li>Frontend</li>
+                        <li>Booking Service</li>
+                        <li>Payment Service</li>
+                        <li>Search Service</li>
+                        <li>User Service</li>
+                        <li>Notification Service</li>
+                    </ul>
+
+                    <p>
+                        <b>Build URL:</b>
+                        <a href="${BUILD_URL}">${BUILD_URL}</a>
+                    </p>
+                """,
+
+                to: 'chetan.singh673@gmail.com,chetan.pokhariya93@gmail.com',
+                mimeType: 'text/html'
+            )
+
+        }
+
+        failure {
+
+            emailext(
+                subject: "FAILED: Travel Booking CI/CD - Build #${BUILD_NUMBER}",
+
+                body: """
+                    <h2>Travel Booking CI/CD Pipeline Failed</h2>
+
+                    <p><b>Project:</b> ${JOB_NAME}</p>
+                    <p><b>Build Number:</b> ${BUILD_NUMBER}</p>
+                    <p><b>Status:</b> FAILED</p>
+
+                    <p>Please check the Jenkins console output
+                    to identify the failed service or stage.</p>
+
+                    <p>
+                        <b>Build URL:</b>
+                        <a href="${BUILD_URL}">${BUILD_URL}</a>
+                    </p>
+                """,
+
+                to: 'chetan.singh673@gmail.com,chetan.pokhariya93@gmail.com',
+                mimeType: 'text/html'
+            )
+
+        }
+
+        always {
+            echo "===================================="
+            echo "Travel Booking Pipeline Completed"
+            echo "Build Number: ${BUILD_NUMBER}"
+            echo "Build Status: ${currentBuild.currentResult}"
+            echo "===================================="
+        }
+    }
+}
