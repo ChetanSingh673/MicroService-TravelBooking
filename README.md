@@ -863,13 +863,15 @@ Once CPU utilization decreases below 50%, HPA automatically scales down the addi
 kubectl exec -it booking-service-deployment-6f7d59d7d8-z94bp -n travel-booking -- sh
 ```
 /app # while true; do :; done
+
 Generate CPU load inside Booking Service with above command.
 
-Monitor CPU Utilization```bash
+Monitor CPU Utilization
+```bash
 kubectl top pods -n travel-booking
 ```
-
-
+![Architecture Diagram](screenshot/HPA-Test-CPU-increase-for-booking-microservice.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
 
 # Delete the EKS Cluster
 
