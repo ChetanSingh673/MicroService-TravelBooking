@@ -1,0 +1,19 @@
+config:
+  datasource:
+    host: postgres-service.travel-booking.svc.cluster.local  # postgres-service is the name of the postgres-service.yaml 
+    port: "5432"
+    userSecret:
+       name: postgres-secret 
+       key: POSTGRES_USER
+    passwordSecret:
+      name: postgres-secret
+      key: POSTGRES_PASSWORD
+    database: postgres
+    sslmode: disable
+
+serviceMonitor:
+  enabled: true
+  namespace: monitoring
+  interval: 30s
+  labels:
+    release: monitoring
