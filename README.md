@@ -843,6 +843,8 @@ Open another browser window on your Windows system:
 http://localhost:9187/metrics
 ```
 
+![Architecture Diagram](screenshot/monitoring_13115.png)
+
 
 ---
 
@@ -886,13 +888,13 @@ eksctl delete cluster --name chetan-cluster2026 --region ap-south-1
 # Screenshots
 ![Architecture Diagram](screenshot/website1.png)
 ![Architecture Diagram](screenshot/website2.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
-![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/jenkins_job.png)
+![Architecture Diagram](screenshot/jenkins_job_stage.png)
+![Architecture Diagram](screenshot/sonarqube1.png)
+![Architecture Diagram](screenshot/dcoker_image.png)
+![Architecture Diagram](screenshot/argocd.png)
+![Architecture Diagram](screenshot/route53.png)
+![Architecture Diagram](screenshot/LB.png)
+![Architecture Diagram](screenshot/monitoring_15661_3.png)
+![Architecture Diagram](screenshot/monitoring_22523.png)
 
