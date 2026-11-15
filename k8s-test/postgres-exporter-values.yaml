@@ -16,4 +16,4 @@ serviceMonitor:
   namespace: monitoring
   interval: 30s
   labels:
-    release: prometheus
+    release: monitoring
