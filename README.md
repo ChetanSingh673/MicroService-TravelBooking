@@ -879,12 +879,13 @@ kubectl top pods -n travel-booking
 
 **3. Canary Deployment strategy**
 
-
+---
 # Delete the EKS Cluster
 
 ```bash
 eksctl delete cluster --name chetan-cluster2026 --region ap-south-1 
 ```
+---
 # Screenshots
 ![Architecture Diagram](screenshot/website1.png)
 ![Architecture Diagram](screenshot/website2.png)
