@@ -702,7 +702,8 @@ ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 9090:127.0.0.1:9090 ubuntu
 
 ```bash
 kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80 &
-
+```
+```bash
 kubectl get secret monitoring-grafana -n monitoring \
   -o jsonpath="{.data.admin-password}" | base64 -d
 echo
