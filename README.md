@@ -855,6 +855,22 @@ http://localhost:9187/metrics
 
 ## Some test scenarios:
 
+**1. HPA – CPU Stress Testing and Automatic Scaling**
+
+The Booking Service CPU utilization is increased by running a continuous CPU stress loop inside the pod. When CPU utilization exceeds the HPA target of 50%, Kubernetes automatically scales up the number of pods.
+Once CPU utilization decreases below 50%, HPA automatically scales down the additional pods after the configured stabilization period.
+```bash
+kubectl exec -it booking-service-deployment-6f7d59d7d8-z94bp -n travel-booking -- sh
+```
+/app # while true; do :; done
+Generate CPU load inside Booking Service with above command.
+
+Monitor CPU Utilization```bash
+kubectl top pods -n travel-booking
+```
+
+
+
 # Delete the EKS Cluster
 
 ```bash
