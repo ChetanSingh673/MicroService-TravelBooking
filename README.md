@@ -713,6 +713,136 @@ echo
 ```bash
 ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 3000:127.0.0.1:3000 ubuntu@15.207.88.137
 ```
+---
+## PostgreSQL Monitoring using Prometheus Exporter on AWS EKS
+
+**Step1: Configure PostgreSQL Exporter**
+
+Create the values file:
+
+```bash
+vim postgres-exporter-values.yaml
+```
+Add the following configuration:
+
+```yaml
+config:
+  datasource:
+    host: postgres-service.travel-booking.svc.cluster.local
+    port: "5432"
+    userSecret:
+      name: postgres-secret
+      key: POSTGRES_USER
+    passwordSecret:
+      name: postgres-secret
+      key: POSTGRES_PASSWORD
+    database: postgres
+    sslmode: disable
+
+serviceMonitor:
+  enabled: true
+  namespace: monitoring
+  interval: 30s
+  labels:
+    release: monitoring
+```
+
+**Step2: Check Helm PostgreSQL Charts**
+
+Search for PostgreSQL-related Helm charts:
+```bash
+helm search repo postgresql
+```
+**Step 3: Configure Kubernetes Secret**
+
+Why do we need to copy the Secret?
+
+Our PostgreSQL Secret is available in the travel-booking namespace, whereas PostgreSQL Exporter is deployed in the monitoring namespace.
+
+Kubernetes Secrets are namespace-specific. A Pod in the monitoring namespace cannot directly reference a Secret from travel-booking.
+
+Therefore, we create a namespace-local copy.
+
+Run:
+```bash
+kubectl get secret postgres-secret -n travel-booking -o json \
+| jq 'del(.metadata.namespace,.metadata.resourceVersion,.metadata.uid,.metadata.creationTimestamp,.metadata.managedFields)' \
+| kubectl apply -n monitoring -f -
+```
+
+Verify:
+
+```kubectl get secret postgres-secret -n monitoring```
+
+Expected:
+
+|NAME | TYPE | DATA |
+|:--- | :--- | :--- |
+|postgres-secret | Opaque | 3|
+
+**Security note:** This command copies the existing Secret, including its data. For a long-term production solution, AWS Secrets Manager with External Secrets Operator can manage the Secret synchronization automatically.
+
+**Step 4: Install PostgreSQL Exporter using Helm**
+```bash
+helm install prometheus-exporter prometheus-community/prometheus-postgres-exporter --namespace monitoring -f https://raw.githubusercontent.com/ChetanSingh673/MicroService-TravelBooking/main/k8s-test/postgres-exporter-values.yaml
+```
+
+**Step 5: Verify Helm Installation**
+
+Check the Helm releases:
+```bash
+helm list -n monitoring
+```
+Check PostgreSQL Exporter Pod:
+```bash
+kubectl get pods -n monitoring | grep postgres
+```
+Check the Service:
+```bash
+kubectl get svc -n monitoring | grep postgres
+```
+Check the ServiceMonitor:
+```bash
+kubectl get servicemonitor -n monitoring --show-labels
+```
+Verify that the PostgreSQL Exporter ServiceMonitor has:
+
+```release: monitoring```
+
+**Step 6: Access PostgreSQL Exporter Metrics**
+
+Run port forwarding in the EC2 terminal:
+```bash
+kubectl port-forward -n monitoring svc/prometheus-exporter-prometheus-postgres-exporter 9187:80 &
+```
+This forwards local EC2 port 9187 to port 80 of the Kubernetes Service, which routes traffic to the exporter container on port 9187.
+
+Verify PostgreSQL connectivity:
+```bash
+curl -s http://localhost:9187/metrics | grep pg_up
+```
+
+Expected output:
+
+```pg_up 1```
+
+**Result:** pg_up 1 confirms that PostgreSQL Exporter can successfully connect to PostgreSQL
+
+**Step 6: Access Exporter from the Local Windows System**
+
+To access the exporter running on the EC2 instance from your local Windows machine, create an SSH tunnel.
+
+Open PowerShell or Git Bash on your local system and run:
+```bash
+ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 9187:127.0.0.1:9187 ubuntu@3.111.40.249
+```
+Keep this SSH terminal running.
+
+Open another browser window on your Windows system:
+```bash
+http://localhost:9187/metrics
+```
+
 
 ---
 
@@ -722,6 +852,8 @@ ssh -i "C:\Users\cheta\Downloads\mumbaikey.pem" -N -L 3000:127.0.0.1:3000 ubuntu
 * kubernetes 17119 Docs: https://grafana.com/grafana/dashboards/18283-kubernetes-dashboard/
 
 ---
+
+## Some test scenarios:
 
 # Delete the EKS Cluster
 
