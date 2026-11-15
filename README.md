@@ -873,10 +873,26 @@ kubectl top pods -n travel-booking
 ![Architecture Diagram](screenshot/HPA-Test-CPU-increase-for-booking-microservice.png)
 ![Architecture Diagram](screenshot/HPA-pod-increase.png)
 
+**2. Blue-Green deployment strategy**
+
+**3. Canary Deployment strategy**
+
+
 # Delete the EKS Cluster
 
 ```bash
 eksctl delete cluster --name chetan-cluster2026 --region ap-south-1 
 ```
 # Screenshots
+![Architecture Diagram](screenshot/website1.png)
+![Architecture Diagram](screenshot/website2.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
+![Architecture Diagram](screenshot/HPA-pod-increase.png)
 
