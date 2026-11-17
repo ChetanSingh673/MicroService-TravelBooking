@@ -20,7 +20,7 @@ spec:
     spec:
      containers: 
       - name: frontend
-        image: chetansingh673/travel-frontend:v1-build-4
+        image: chetansingh673/travel-frontend:v1-build-1
         imagePullPolicy: Always         
         ports:
           - containerPort: 80
