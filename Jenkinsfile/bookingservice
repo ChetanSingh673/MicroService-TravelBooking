@@ -246,7 +246,7 @@ pipeline {
 
                             git add "${SELECTED_MANIFEST}"
 
-                            git diff --cached --quiet || git commit -m "Updated ${DEPLOY_VERSION} image to ${IMAGE_TAG}"
+                            git diff --cached --quiet || git commit -m "Updated ${params.DEPLOY_VERSION} image to ${IMAGE_TAG}"
 
                             git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/$GIT_USERNAME/MicroService-TravelBooking.git main
                         """
