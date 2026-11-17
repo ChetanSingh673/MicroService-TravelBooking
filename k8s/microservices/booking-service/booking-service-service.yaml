@@ -5,6 +5,7 @@ metadata:
   namespace: travel-booking
   labels:
     app: booking-service
+    version: stable
 spec:
   type: ClusterIP
   selector:
