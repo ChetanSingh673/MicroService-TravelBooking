@@ -204,7 +204,7 @@ pipeline {
                     env.IMAGE_REF = params.DEPLOY_VERSION == 'canary' ?
                         "${IMAGE_NAME}:${IMAGE_TAG}" :
                         sh(
-                            script: "grep 'image:' ${CANARY_MANIFEST} | awk '{print \\$2}'",
+                            script: "grep 'image:' ${CANARY_MANIFEST} | awk '{print \\\$2}'",
                             returnStdout: true
                         ).trim()
                 }

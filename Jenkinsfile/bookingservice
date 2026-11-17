@@ -235,7 +235,7 @@ pipeline {
                             git checkout main
                             git reset --hard origin/main
 
-                            echo "Selected action: ${DEPLOY_VERSION}"
+                            echo "Selected action: ${params.DEPLOY_VERSION}"
                             echo "Updating manifest: ${SELECTED_MANIFEST}"
                             echo "Using image: ${IMAGE_REF}"
 
