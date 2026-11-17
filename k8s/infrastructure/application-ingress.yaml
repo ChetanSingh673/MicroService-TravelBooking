@@ -4,12 +4,16 @@ metadata:
   name: travel-booking-ingress
   namespace: travel-booking
   annotations:
+    # ADDED: Share the ALB with the monitoring Ingress
+    alb.ingress.kubernetes.io/group.name: travel-booking-shared
+    alb.ingress.kubernetes.io/group.order: '0'
+     
     alb.ingress.kubernetes.io/load-balancer-name: travel-booking-alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:607416643673:certificate/353f5274-a98e-4d91-b06b-b60f718a0432
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:607416643673:certificate/cfcd76cf-c2fa-4ec9-9955-b53005139bc2
 spec:
   ingressClassName: alb
   rules:
