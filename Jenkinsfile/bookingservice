@@ -11,7 +11,6 @@ pipeline {
         disableConcurrentBuilds()
     }
 
-    // UPDATED: Deployment selection
     parameters {
         choice(
             name: 'DEPLOY_VERSION',
@@ -28,10 +27,10 @@ pipeline {
 
     environment {
         IMAGE_NAME = "chetansingh673/travel-booking-service"
-        GIT_USER   = "ChetanSingh673"
-        GIT_EMAIL  = "chetan.singh673@gmail.com"
+        GIT_USER = "ChetanSingh673"
+        GIT_EMAIL = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner'
-        SERVICE_DIR  = 'microservicecode/booking-service'
+        SERVICE_DIR = 'microservicecode/booking-service'
 
         // Existing stable manifest
         MANIFEST = 'k8s/microservices/booking-service/booking-service-deployment.yaml'
@@ -136,7 +135,6 @@ pipeline {
             }
         }
 
-        // UPDATED: Build a new image only when deploying canary
         stage('Build and Push Image') {
             when {
                 allOf {
@@ -171,7 +169,6 @@ pipeline {
             }
         }
 
-        // UPDATED: Scan only the newly built canary image
         stage("Trivy Scan Image") {
             when {
                 allOf {
@@ -195,23 +192,44 @@ pipeline {
             }
         }
 
-        // UPDATED: Select manifest and image based on Jenkins choice
         stage('Select Deployment Version') {
             steps {
                 script {
-                    env.SELECTED_MANIFEST = params.DEPLOY_VERSION == 'canary' ? CANARY_MANIFEST : MANIFEST
+                    env.SELECTED_MANIFEST = params.DEPLOY_VERSION == 'canary' ?
+                        CANARY_MANIFEST : MANIFEST
 
-                    env.IMAGE_REF = params.DEPLOY_VERSION == 'canary' ?
-                        "${IMAGE_NAME}:${IMAGE_TAG}" :
-                        sh(
-                            script: "grep 'image:' ${CANARY_MANIFEST} | awk '{print \\\$2}'",
-                            returnStdout: true
-                        ).trim()
+                    if (params.DEPLOY_VERSION == 'canary') {
+
+                        env.IMAGE_REF = "${IMAGE_NAME}:${IMAGE_TAG}"
+
+                    } else if (params.DEPLOY_VERSION == 'promote-to-stable') {
+
+                        // Read the existing image from the canary YAML
+                        def canaryContent = readFile(CANARY_MANIFEST)
+
+                        def imageLine = canaryContent.readLines().find {
+                            it.trim().startsWith('image:')
+                        }
+
+                        if (!imageLine) {
+                            error("No image entry found in ${CANARY_MANIFEST}")
+                        }
+
+                        env.IMAGE_REF = imageLine.trim()
+                            .replaceFirst(/^image:\s*/, '')
+
+                        env.IMAGE_TAG = env.IMAGE_REF.substring(
+                            env.IMAGE_REF.lastIndexOf(':') + 1
+                        )
+                    }
+
+                    echo "Selected action: ${params.DEPLOY_VERSION}"
+                    echo "Selected manifest: ${env.SELECTED_MANIFEST}"
+                    echo "Using image: ${env.IMAGE_REF}"
                 }
             }
         }
 
-        // UPDATED: Update only the selected manifest
         stage('Update K8s Manifest') {
             when {
                 branch 'main'
