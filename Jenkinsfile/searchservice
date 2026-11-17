@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-     tools {
+    tools {
         jdk 'jdk21'
         go 'go'
         nodejs "node26"
@@ -11,18 +11,40 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    // UPDATED: Deployment selection
+    parameters {
+        choice(
+            name: 'DEPLOY_VERSION',
+            choices: ['canary', 'promote-to-stable'],
+            description: 'Select whether to deploy a new canary or promote the tested canary to stable'
+        )
+
+        string(
+            name: 'RELEASE_VERSION',
+            defaultValue: 'v1',
+            description: 'Enter new release version, e.g. v3, v4, v5 (used only for canary)'
+        )
+    }
+
     environment {
         IMAGE_NAME = "chetansingh673/travel-search-service"
         GIT_USER   = "ChetanSingh673"
         GIT_EMAIL  = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner'
         SERVICE_DIR  = 'microservicecode/search-service'
-        MANIFEST     = 'k8s/microservices/search-service/search-service-deployment.yaml'
+
+        // Existing stable manifest
+        MANIFEST = 'k8s/microservices/search-service/search-service-deployment.yaml'
+
+        // Canary manifest
+        CANARY_MANIFEST = 'k8s/microservices/search-service/search-service-canary-deployment.yaml'
+
         SONAR_PROJECT_KEY = 'travel-search-service'
-        SONAR_PROJECT_NAME = 'travel-search-service' 
+        SONAR_PROJECT_NAME = 'travel-search-service'
     }
-    
+
     stages {
+
         stage("Clean Workspace") {
             steps {
                 cleanWs()
@@ -46,22 +68,22 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Download Dependencies') {
-          steps {
-            dir("${SERVICE_DIR}") {
-              sh '''
-                 set -eu
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh '''
+                        set -eu
 
-                 go mod download
-                 go mod tidy
-                 go mod download
-                 go mod verify
+                        go mod download
+                        go mod tidy
+                        go mod download
+                        go mod verify
 
-                 test -f go.sum
-             '''
+                        test -f go.sum
+                    '''
+                }
             }
-          } 
         }
 
         stage('Go Unit Tests') {
@@ -86,12 +108,12 @@ pipeline {
 
         stage("SonarQube Analysis") {
             steps {
-              dir("${SERVICE_DIR}") {
-                withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName="$SONAR_PROJECT_NAME" \
-                        -Dsonar.projectKey="$SONAR_PROJECT_KEY" '''
-                   } 
+                dir("${SERVICE_DIR}") {
+                    withSonarQubeEnv('sonar-server') {
+                        sh ''' $SCANNER_HOME/bin/sonar-scanner \
+                            -Dsonar.projectName="$SONAR_PROJECT_NAME" \
+                            -Dsonar.projectKey="$SONAR_PROJECT_KEY" '''
+                    }
                 }
             }
         }
@@ -105,116 +127,168 @@ pipeline {
                 }
             }
         }
-        
+
         stage("Trivy File Scan") {
             steps {
-              dir("${SERVICE_DIR}") { 
-                sh "trivy fs . > trivyfs.txt"
-               }
-           }
+                dir("${SERVICE_DIR}") {
+                    sh "trivy fs . > trivyfs.txt"
+                }
+            }
         }
-        
-        stage('Build and Push Image') {
-            when { branch 'main' }
-            steps {
-              dir("${SERVICE_DIR}") { 
-                script {
-                    env.IMAGE_TAG = "build-${BUILD_NUMBER}"
 
-                    withCredentials([string(credentialsId: 'dockerhub-creds', variable: 'dockerpwd')]) {                       
-                        sh """
-                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                        echo "$dockerpwd" | docker login -u chetansingh673 --password-stdin
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        """
-                       }
+        // UPDATED: Build a new image only when deploying canary
+        stage('Build and Push Image') {
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        params.DEPLOY_VERSION == 'canary'
+                    }
+                }
+            }
+            steps {
+                dir("${SERVICE_DIR}") {
+                    script {
+
+                        if (!(params.RELEASE_VERSION ==~ /v[0-9]+/)) {
+                            error("Invalid RELEASE_VERSION. Use a format such as v3, v4 or v5.")
+                        }
+
+                        env.IMAGE_TAG = "${params.RELEASE_VERSION}-build-${BUILD_NUMBER}"
+                        env.IMAGE_REF = "${IMAGE_NAME}:${IMAGE_TAG}"
+
+                        withCredentials([
+                            string(credentialsId: 'dockerhub-creds', variable: 'dockerpwd')
+                        ]) {
+                            sh """
+                                docker build -t ${IMAGE_REF} .
+                                echo "$dockerpwd" | docker login -u chetansingh673 --password-stdin
+                                docker push ${IMAGE_REF}
+                            """
+                        }
                     }
                 }
             }
         }
 
+        // UPDATED: Scan only the newly built canary image
         stage("Trivy Scan Image") {
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        params.DEPLOY_VERSION == 'canary'
+                    }
+                }
+            }
             steps {
-              dir("${SERVICE_DIR}") { 
-                script {
-                    sh """
-                    echo "Running Trivy scan on ${IMAGE_NAME}:${IMAGE_TAG}"
+                dir("${SERVICE_DIR}") {
+                    script {
+                        sh """
+                            echo "Running Trivy scan on ${IMAGE_REF}"
 
-                    # JSON report
-                    trivy image -f json -o trivy-image.json ${IMAGE_NAME}:${IMAGE_TAG}
-                    # HTML report using built-in HTML format
-                    trivy image -f table -o trivy-image.txt ${IMAGE_NAME}:${IMAGE_TAG}
-
-                    # Fail build if HIGH/CRITICAL vulnerabilities found
-                    # trivy image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG} || true
-                    """
-                  }
+                            trivy image -f json -o trivy-image.json ${IMAGE_REF}
+                            trivy image -f table -o trivy-image.txt ${IMAGE_REF}
+                        """
+                    }
                 }
             }
         }
 
-        stage('Update K8s Manifest') {
-            when { branch 'main' }
+        // UPDATED: Select manifest and image based on Jenkins choice
+        stage('Select Deployment Version') {
             steps {
                 script {
-                    withCredentials([usernamePassword(
-                        credentialsId: 'github-creds',
-                        usernameVariable: 'GIT_USERNAME',
-                        passwordVariable: 'GIT_TOKEN'
-                    )]) {              
+                    env.SELECTED_MANIFEST = params.DEPLOY_VERSION == 'canary' ? CANARY_MANIFEST : MANIFEST
+
+                    env.IMAGE_REF = params.DEPLOY_VERSION == 'canary' ?
+                        "${IMAGE_NAME}:${IMAGE_TAG}" :
+                        sh(
+                            script: "grep 'image:' ${CANARY_MANIFEST} | awk '{print \\$2}'",
+                            returnStdout: true
+                        ).trim()
+                }
+            }
+        }
+
+        // UPDATED: Update only the selected manifest
+        stage('Update K8s Manifest') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'github-creds',
+                            usernameVariable: 'GIT_USERNAME',
+                            passwordVariable: 'GIT_TOKEN'
+                        )
+                    ]) {
                         sh """
-                        set -e
-                        git config user.name "$GIT_USERNAME"
-                        git config user.email "$GIT_EMAIL"
+                            set -e
 
-                        git fetch origin
-                        git checkout main
-                        git reset --hard origin/main
+                            git config user.name "$GIT_USERNAME"
+                            git config user.email "$GIT_EMAIL"
 
-                        sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" "$MANIFEST"
+                            git fetch origin
+                            git checkout main
+                            git reset --hard origin/main
 
-                        git add "$MANIFEST"
-                        git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
-                        git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/$GIT_USERNAME/MicroService-TravelBooking.git main
+                            echo "Selected action: ${DEPLOY_VERSION}"
+                            echo "Updating manifest: ${SELECTED_MANIFEST}"
+                            echo "Using image: ${IMAGE_REF}"
+
+                            sed -i "s|image:.*|image: ${IMAGE_REF}|" "${SELECTED_MANIFEST}"
+
+                            echo "Updated image:"
+                            grep 'image:' "${SELECTED_MANIFEST}"
+
+                            git add "${SELECTED_MANIFEST}"
+
+                            git diff --cached --quiet || git commit -m "Updated ${DEPLOY_VERSION} image to ${IMAGE_TAG}"
+
+                            git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/$GIT_USERNAME/MicroService-TravelBooking.git main
                         """
                     }
                 }
             }
         }
     }
-  post {
-    always {
-      dir("${SERVICE_DIR}") {
-        script {
-            echo "========== EMAIL NOTIFICATION START =========="
-            echo "Build Status: ${currentBuild.currentResult}"
-            echo "Job Name: ${env.JOB_NAME}"
-            echo "Build Number: ${env.BUILD_NUMBER}"
-            echo "Build URL: ${env.BUILD_URL}"
 
-            emailext(
-                subject: "Pipeline ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <h2>Search Jenkins CI/CD Pipeline Status</h2>
+    post {
+        always {
+            dir("${SERVICE_DIR}") {
+                script {
+                    echo "========== EMAIL NOTIFICATION START =========="
+                    echo "Build Status: ${currentBuild.currentResult}"
+                    echo "Job Name: ${env.JOB_NAME}"
+                    echo "Build Number: ${env.BUILD_NUMBER}"
+                    echo "Build URL: ${env.BUILD_URL}"
 
-                    <p><b>Project:</b> ${env.JOB_NAME}</p>
-                    <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
-                    <p><b>Status:</b> ${currentBuild.currentResult}</p>
+                    emailext(
+                        subject: "Pipeline ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: """
+                            <h2>Booking Jenkins CI/CD Pipeline Status</h2>
 
-                    <p>
-                        <b>Build URL:</b>
-                        <a href="${env.BUILD_URL}">
-                            ${env.BUILD_URL}
-                        </a>
-                    </p>
-                """,
-                to: 'chetan.singh673@gmail.com,chetan.pokhariya93@gmail.com',
-                mimeType: 'text/html'
-            )
+                            <p><b>Project:</b> ${env.JOB_NAME}</p>
+                            <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
+                            <p><b>Status:</b> ${currentBuild.currentResult}</p>
 
-            echo "========== EMAIL NOTIFICATION END =========="
-           }
+                            <p>
+                                <b>Build URL:</b>
+                                <a href="${env.BUILD_URL}">
+                                    ${env.BUILD_URL}
+                                </a>
+                            </p>
+                        """,
+                        to: 'chetan.singh673@gmail.com,chetan.pokhariya93@gmail.com',
+                        mimeType: 'text/html'
+                    )
+
+                    echo "========== EMAIL NOTIFICATION END =========="
+                }
+            }
         }
-     }
-  }
+    }
 }

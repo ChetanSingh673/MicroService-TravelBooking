@@ -3,6 +3,7 @@ pipeline {
 
     tools {
         jdk 'jdk21'
+        go 'go'
         nodejs "node26"
     }
 
@@ -10,18 +11,40 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    // UPDATED: Deployment selection
+    parameters {
+        choice(
+            name: 'DEPLOY_VERSION',
+            choices: ['canary', 'promote-to-stable'],
+            description: 'Select whether to deploy a new canary or promote the tested canary to stable'
+        )
+
+        string(
+            name: 'RELEASE_VERSION',
+            defaultValue: 'v1',
+            description: 'Enter new release version, e.g. v3, v4, v5 (used only for canary)'
+        )
+    }
+
     environment {
         IMAGE_NAME = "chetansingh673/travel-frontend"
-        GIT_USER = "ChetanSingh673"
-        GIT_EMAIL = "chetan.singh673@gmail.com"
+        GIT_USER   = "ChetanSingh673"
+        GIT_EMAIL  = "chetan.singh673@gmail.com"
         SCANNER_HOME = tool 'sonar-scanner'
-        SERVICE_DIR = 'microservicecode/frontend'
+        SERVICE_DIR  = 'microservicecode/frontend'
+
+        // Existing stable manifest
         MANIFEST = 'k8s/microservices/frontend/frontend-deployment.yaml'
+
+        // Canary manifest
+        CANARY_MANIFEST = 'k8s/microservices/frontend/frontend-canary-deployment.yaml'
+
         SONAR_PROJECT_KEY = 'travel-frontend'
         SONAR_PROJECT_NAME = 'travel-frontend'
     }
 
     stages {
+
         stage("Clean Workspace") {
             steps {
                 cleanWs()
@@ -30,72 +53,66 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/ChetanSingh673/MicroService-TravelBooking.git'
+                git branch: 'main', url: 'https://github.com/ChetanSingh673/MicroService-TravelBooking.git'
             }
         }
 
-        stage('Verify Node.js Environment') {
+        stage('Verify Go Environment') {
             steps {
                 dir("${SERVICE_DIR}") {
                     sh '''
-                        set -eu
-                        node --version
-                        npm --version
-                        test -f package.json
-                        echo "Node.js environment verified"
+                        go version
+                        go env GOMOD
+                        test -f go.mod
                     '''
                 }
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Download Dependencies') {
             steps {
                 dir("${SERVICE_DIR}") {
                     sh '''
                         set -eu
 
-                        if [ -f package-lock.json ]; then
-                            npm ci
-                        else
-                            npm install
-                        fi
+                        go mod download
+                        go mod tidy
+                        go mod download
+                        go mod verify
+
+                        test -f go.sum
                     '''
                 }
             }
         }
 
-        stage('React Unit Tests') {
+        stage('Go Unit Tests') {
             steps {
                 dir("${SERVICE_DIR}") {
                     sh '''
-                        set -eu
-                        npm test -- --watchAll=false --passWithNoTests
+                        go test ./...
                     '''
                 }
             }
         }
-        
-        stage('Build React Application') {
-          steps {
-            dir('microservicecode/frontend') {
-               sh '''
-                  set -eu
-                  CI=false npm run build
-                '''
-              }
-           }
+
+        stage('Build Go Application') {
+            steps {
+                dir("${SERVICE_DIR}") {
+                    sh '''
+                        CGO_ENABLED=0 go build -o app .
+                    '''
+                }
+            }
         }
 
         stage("SonarQube Analysis") {
             steps {
                 dir("${SERVICE_DIR}") {
                     withSonarQubeEnv('sonar-server') {
-                        sh '''
-                            $SCANNER_HOME/bin/sonar-scanner \
-                                -Dsonar.projectName="$SONAR_PROJECT_NAME" \
-                                -Dsonar.projectKey="$SONAR_PROJECT_KEY"
-                        '''
+                        sh ''' $SCANNER_HOME/bin/sonar-scanner \
+                            -Dsonar.projectName="$SONAR_PROJECT_NAME" \
+                            -Dsonar.projectKey="$SONAR_PROJECT_KEY" '''
                     }
                 }
             }
@@ -105,10 +122,7 @@ pipeline {
             steps {
                 script {
                     timeout(time: 3, unit: 'MINUTES') {
-                        waitForQualityGate(
-                            abortPipeline: false,
-                            credentialsId: 'sonar-token'
-                        )
+                        waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                     }
                 }
             }
@@ -122,23 +136,34 @@ pipeline {
             }
         }
 
+        // UPDATED: Build a new image only when deploying canary
         stage('Build and Push Image') {
             when {
-                branch 'main'
+                allOf {
+                    branch 'main'
+                    expression {
+                        params.DEPLOY_VERSION == 'canary'
+                    }
+                }
             }
-
             steps {
                 dir("${SERVICE_DIR}") {
                     script {
-                        env.IMAGE_TAG = "build-${BUILD_NUMBER}"
+
+                        if (!(params.RELEASE_VERSION ==~ /v[0-9]+/)) {
+                            error("Invalid RELEASE_VERSION. Use a format such as v3, v4 or v5.")
+                        }
+
+                        env.IMAGE_TAG = "${params.RELEASE_VERSION}-build-${BUILD_NUMBER}"
+                        env.IMAGE_REF = "${IMAGE_NAME}:${IMAGE_TAG}"
 
                         withCredentials([
-                            string(
-                                credentialsId: 'dockerhub-creds',variable: 'dockerpwd')]) {
+                            string(credentialsId: 'dockerhub-creds', variable: 'dockerpwd')
+                        ]) {
                             sh """
-                                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                                echo "\$dockerpwd" | docker login -u chetansingh673 --password-stdin
-                                docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                                docker build -t ${IMAGE_REF} .
+                                echo "$dockerpwd" | docker login -u chetansingh673 --password-stdin
+                                docker push ${IMAGE_REF}
                             """
                         }
                     }
@@ -146,32 +171,51 @@ pipeline {
             }
         }
 
+        // UPDATED: Scan only the newly built canary image
         stage("Trivy Scan Image") {
+            when {
+                allOf {
+                    branch 'main'
+                    expression {
+                        params.DEPLOY_VERSION == 'canary'
+                    }
+                }
+            }
             steps {
                 dir("${SERVICE_DIR}") {
                     script {
                         sh """
-                            echo "Running Trivy scan on ${IMAGE_NAME}:${IMAGE_TAG}"
+                            echo "Running Trivy scan on ${IMAGE_REF}"
 
-                            # JSON report
-                            trivy image -f json -o trivy-image.json ${IMAGE_NAME}:${IMAGE_TAG}
-
-                            # HTML report using built-in HTML format
-                            trivy image -f table -o trivy-image.txt ${IMAGE_NAME}:${IMAGE_TAG}
-
-                            # Fail build if HIGH/CRITICAL vulnerabilities found
-                            # trivy image --exit-code 1 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG} || true
+                            trivy image -f json -o trivy-image.json ${IMAGE_REF}
+                            trivy image -f table -o trivy-image.txt ${IMAGE_REF}
                         """
                     }
                 }
             }
         }
 
+        // UPDATED: Select manifest and image based on Jenkins choice
+        stage('Select Deployment Version') {
+            steps {
+                script {
+                    env.SELECTED_MANIFEST = params.DEPLOY_VERSION == 'canary' ? CANARY_MANIFEST : MANIFEST
+
+                    env.IMAGE_REF = params.DEPLOY_VERSION == 'canary' ?
+                        "${IMAGE_NAME}:${IMAGE_TAG}" :
+                        sh(
+                            script: "grep 'image:' ${CANARY_MANIFEST} | awk '{print \\$2}'",
+                            returnStdout: true
+                        ).trim()
+                }
+            }
+        }
+
+        // UPDATED: Update only the selected manifest
         stage('Update K8s Manifest') {
             when {
                 branch 'main'
             }
-
             steps {
                 script {
                     withCredentials([
@@ -179,23 +223,32 @@ pipeline {
                             credentialsId: 'github-creds',
                             usernameVariable: 'GIT_USERNAME',
                             passwordVariable: 'GIT_TOKEN'
-                        )]) {
+                        )
+                    ]) {
                         sh """
                             set -e
 
-                            git config user.name "\$GIT_USERNAME"
-                            git config user.email "\$GIT_EMAIL"
+                            git config user.name "$GIT_USERNAME"
+                            git config user.email "$GIT_EMAIL"
 
                             git fetch origin
                             git checkout main
                             git reset --hard origin/main
 
-                            sed -i "s|image:.*|image: ${IMAGE_NAME}:${IMAGE_TAG}|" "$MANIFEST"
+                            echo "Selected action: ${DEPLOY_VERSION}"
+                            echo "Updating manifest: ${SELECTED_MANIFEST}"
+                            echo "Using image: ${IMAGE_REF}"
 
-                            git add "$MANIFEST"
-                            git diff --cached --quiet || git commit -m "Updated image to ${IMAGE_TAG}"
+                            sed -i "s|image:.*|image: ${IMAGE_REF}|" "${SELECTED_MANIFEST}"
 
-                            git push https://\${GIT_USERNAME}:\${GIT_TOKEN}@github.com/\$GIT_USERNAME/MicroService-TravelBooking.git main
+                            echo "Updated image:"
+                            grep 'image:' "${SELECTED_MANIFEST}"
+
+                            git add "${SELECTED_MANIFEST}"
+
+                            git diff --cached --quiet || git commit -m "Updated ${DEPLOY_VERSION} image to ${IMAGE_TAG}"
+
+                            git push https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/$GIT_USERNAME/MicroService-TravelBooking.git main
                         """
                     }
                 }
@@ -216,7 +269,7 @@ pipeline {
                     emailext(
                         subject: "Pipeline ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                         body: """
-                            <h2>Frontend Jenkins CI/CD Pipeline Status</h2>
+                            <h2>Booking Jenkins CI/CD Pipeline Status</h2>
 
                             <p><b>Project:</b> ${env.JOB_NAME}</p>
                             <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
