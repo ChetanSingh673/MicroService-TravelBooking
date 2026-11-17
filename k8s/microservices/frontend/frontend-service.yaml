@@ -5,10 +5,12 @@ metadata:
   namespace: travel-booking
   labels:
     app: frontend
+    version: stable 
 spec:
   type: ClusterIP
   selector: 
     app: frontend
+    version: stable
   ports:
     - port: 80
       targetPort: 80  

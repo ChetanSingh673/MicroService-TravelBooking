@@ -4,16 +4,19 @@ metadata:
   name: frontend-deployment
   namespace: travel-booking
   labels:
-    app: frontend 
+    app: frontend
+    version: stable 
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: frontend
+      version: stable
   template:
     metadata:
       labels:
         app: frontend
+        version: stable
     spec:
      containers: 
       - name: frontend
