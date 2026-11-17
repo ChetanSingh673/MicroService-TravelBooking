@@ -3,7 +3,6 @@ pipeline {
 
     tools {
         jdk 'jdk21'
-        go 'go'
         nodejs "node26"
     }
 
@@ -57,53 +56,56 @@ pipeline {
             }
         }
 
-        stage('Verify Go Environment') {
+        stage('Verify Node.js Environment') {
             steps {
                 dir("${SERVICE_DIR}") {
                     sh '''
-                        go version
-                        go env GOMOD
-                        test -f go.mod
+                        set -eu
+                        node --version
+                        npm --version
+                        test -f package.json
+                        echo "Node.js environment verified"
                     '''
                 }
             }
         }
 
-        stage('Download Dependencies') {
+        stage('Install Dependencies') {
             steps {
                 dir("${SERVICE_DIR}") {
                     sh '''
                         set -eu
 
-                        go mod download
-                        go mod tidy
-                        go mod download
-                        go mod verify
-
-                        test -f go.sum
+                        if [ -f package-lock.json ]; then
+                            npm ci
+                        else
+                            npm install
+                        fi
                     '''
                 }
             }
         }
 
-        stage('Go Unit Tests') {
+        stage('React Unit Tests') {
             steps {
                 dir("${SERVICE_DIR}") {
                     sh '''
-                        go test ./...
+                        set -eu
+                        npm test -- --watchAll=false --passWithNoTests
                     '''
                 }
             }
         }
-
-        stage('Build Go Application') {
-            steps {
-                dir("${SERVICE_DIR}") {
-                    sh '''
-                        CGO_ENABLED=0 go build -o app .
-                    '''
-                }
-            }
+        
+        stage('Build React Application') {
+          steps {
+            dir('microservicecode/frontend') {
+               sh '''
+                  set -eu
+                  CI=false npm run build
+                '''
+              }
+           }
         }
 
         stage("SonarQube Analysis") {
