@@ -5,15 +5,18 @@ metadata:
   namespace: travel-booking
   labels:
     app: notification-service
+    version: stable
 spec:
   replicas: 1
   selector: 
     matchLabels:
       app: notification-service
+      version: stable
   template:
     metadata:
       labels:
         app: notification-service
+        version: stable
     spec:
       containers:
        - name: notification-service

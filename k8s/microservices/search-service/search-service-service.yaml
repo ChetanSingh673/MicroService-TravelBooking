@@ -4,11 +4,13 @@ metadata:
   name: search-service-service
   namespace: travel-booking
   labels: 
-    name: search-service  
+    app: search-service  
+    version: stable
 spec:
   type: ClusterIP
   selector: 
     app: search-service
+    version: stable
   ports:
     - port: 3002
       targetPort: 3002  

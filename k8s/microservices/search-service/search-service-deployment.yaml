@@ -5,15 +5,18 @@ metadata:
   namespace: travel-booking
   labels:
     app: search-service  
+    version: stable
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: search-service
+      version: stable
   template:
     metadata:
       labels:
         app: search-service
+        version: stable
     spec:
       containers:
         - name: search-service

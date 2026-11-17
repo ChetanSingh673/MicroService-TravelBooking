@@ -5,10 +5,12 @@ metadata:
   namespace: travel-booking
   labels: 
     app: user-service
+    version: stable
 spec:
   type: ClusterIP
   selector:
     app: user-service
+    version: stable
   ports:
     - port: 3001
       targetPort: 3001   

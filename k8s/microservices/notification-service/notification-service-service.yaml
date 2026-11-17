@@ -5,10 +5,12 @@ metadata:
   namespace: travel-booking
   labels:
     app: notificaton-service
+    version: stable
 spec:
   type: ClusterIP
   selector:
     app: notification-service
+    version: stable
   ports:
     - port: 3005
       targetPort: 3005  

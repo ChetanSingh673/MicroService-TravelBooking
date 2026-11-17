@@ -5,15 +5,18 @@ metadata:
   namespace: travel-booking
   labels:
     app: payment-service
+    version: stable
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: payment-service
+      version: stable
   template:  
     metadata:
       labels:
         app: payment-service
+        version: stable
     spec:
       containers:
         - name: payment-service
