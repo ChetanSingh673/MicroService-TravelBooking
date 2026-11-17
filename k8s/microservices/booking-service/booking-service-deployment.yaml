@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: booking-service-deployment
+  name: booking-service-stable-deployment
   namespace: travel-booking
   labels:
     app: booking-service
