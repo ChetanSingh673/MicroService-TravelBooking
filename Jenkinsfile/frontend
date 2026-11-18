@@ -33,7 +33,7 @@ pipeline {
         SERVICE_DIR  = 'microservicecode/frontend'
 
         // Existing stable manifest
-        MANIFEST = 'k8s/microservices/frontend/frontend-deployment.yaml'
+        MANIFEST = 'k8s/microservices/frontend/frontend-stable-deployment.yaml'
 
         // Canary manifest
         CANARY_MANIFEST = 'k8s/microservices/frontend/frontend-canary-deployment.yaml'

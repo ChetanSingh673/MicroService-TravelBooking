@@ -33,7 +33,7 @@ pipeline {
         SERVICE_DIR = 'microservicecode/booking-service'
 
         // Existing stable manifest
-        MANIFEST = 'k8s/microservices/booking-service/booking-service-deployment.yaml'
+        MANIFEST = 'k8s/microservices/booking-service/booking-service-stable-deployment.yaml'
 
         // Canary manifest
         CANARY_MANIFEST = 'k8s/microservices/booking-service/booking-service-canary-deployment.yaml'

@@ -34,7 +34,7 @@ pipeline {
         SERVICE_DIR  = 'microservicecode/notification-service'
 
         // Existing stable manifest
-        MANIFEST = 'k8s/microservices/notification-service/notification-service-deployment.yaml'
+        MANIFEST = 'k8s/microservices/notification-service/notification-service-stable-deployment.yaml'
 
         // Canary manifest
         CANARY_MANIFEST = 'k8s/microservices/notification-service/notification-service-canary-deployment.yaml'
@@ -199,14 +199,37 @@ pipeline {
         stage('Select Deployment Version') {
             steps {
                 script {
-                    env.SELECTED_MANIFEST = params.DEPLOY_VERSION == 'canary' ? CANARY_MANIFEST : MANIFEST
+                    env.SELECTED_MANIFEST = params.DEPLOY_VERSION == 'canary' ?
+                        CANARY_MANIFEST : MANIFEST
 
-                    env.IMAGE_REF = params.DEPLOY_VERSION == 'canary' ?
-                        "${IMAGE_NAME}:${IMAGE_TAG}" :
-                        sh(
-                            script: "grep 'image:' ${CANARY_MANIFEST} | awk '{print \\\$2}'",
-                            returnStdout: true
-                        ).trim()
+                    if (params.DEPLOY_VERSION == 'canary') {
+
+                        env.IMAGE_REF = "${IMAGE_NAME}:${IMAGE_TAG}"
+
+                    } else if (params.DEPLOY_VERSION == 'promote-to-stable') {
+
+                        // Read the existing image from the canary YAML
+                        def canaryContent = readFile(CANARY_MANIFEST)
+
+                        def imageLine = canaryContent.readLines().find {
+                            it.trim().startsWith('image:')
+                        }
+
+                        if (!imageLine) {
+                            error("No image entry found in ${CANARY_MANIFEST}")
+                        }
+
+                        env.IMAGE_REF = imageLine.trim()
+                            .replaceFirst(/^image:\s*/, '')
+
+                        env.IMAGE_TAG = env.IMAGE_REF.substring(
+                            env.IMAGE_REF.lastIndexOf(':') + 1
+                        )
+                    }
+
+                    echo "Selected action: ${params.DEPLOY_VERSION}"
+                    echo "Selected manifest: ${env.SELECTED_MANIFEST}"
+                    echo "Using image: ${env.IMAGE_REF}"
                 }
             }
         }
