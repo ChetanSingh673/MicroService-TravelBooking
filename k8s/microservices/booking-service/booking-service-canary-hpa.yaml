@@ -1,7 +1,7 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: booking-service-canary-autoscaler
+  name: booking-service-canary-hpa
   namespace: travel-booking
 spec:
   scaleTargetRef:

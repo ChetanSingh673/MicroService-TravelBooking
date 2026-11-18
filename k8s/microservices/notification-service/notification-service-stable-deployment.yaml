@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notification-service-deployment 
+  name: notification-service-stable-deployment 
   namespace: travel-booking
   labels:
     app: notification-service

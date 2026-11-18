@@ -1,17 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: search-service-service
+  name: user-service-stable-service
   namespace: travel-booking
   labels: 
-    app: search-service  
+    app: user-service
     version: stable
 spec:
   type: ClusterIP
-  selector: 
-    app: search-service
+  selector:
+    app: user-service
     version: stable
   ports:
-    - port: 3002
-      targetPort: 3002  
- 
+    - port: 3001
+      targetPort: 3001   

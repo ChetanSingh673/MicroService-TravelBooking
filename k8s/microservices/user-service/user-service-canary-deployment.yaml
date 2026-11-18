@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-service-deployment
+  name: user-service-canary-deployment
   namespace: travel-booking
   labels:
     app: user-service

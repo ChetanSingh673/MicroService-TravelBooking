@@ -1,30 +1,29 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-service-deployment
+  name: search-service-stable-deployment
   namespace: travel-booking
   labels:
-    app: user-service
+    app: search-service  
     version: stable
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: user-service
+      app: search-service
       version: stable
   template:
     metadata:
       labels:
-        app: user-service
+        app: search-service
         version: stable
     spec:
       containers:
-        - name: user-service
-          image: chetansingh673/travel-user-service:build-1
+        - name: search-service
+          image: chetansingh673/travel-search-service:build-1
           imagePullPolicy: Always
           ports:
-            - containerPort: 3001
+            - containerPort: 3002
 
           resources:
             requests:
@@ -37,23 +36,23 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 3001
+              port: 3002
             initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
+            periodSeconds: 10   
+            timeoutSeconds: 5  
             failureThreshold: 3
 
           readinessProbe:
             httpGet:
               path: /health
-              port: 3001
+              port: 3002
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 3
-            failureThreshold: 3
+            failureThreshold: 3    
 
           envFrom:
             - configMapRef:
-                name: user-service-config
+                name: search-service-config
             - secretRef:
-                name: user-service-secret
+                name: search-service-secret                  

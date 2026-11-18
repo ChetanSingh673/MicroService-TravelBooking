@@ -14,6 +14,127 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:607416643673:certificate/cfcd76cf-c2fa-4ec9-9955-b53005139bc2
+
+    # Frontend: 90% Stable, 10% Canary
+    alb.ingress.kubernetes.io/actions.frontend-weighted-service: >
+      {
+        "type": "forward",
+        "forwardConfig": {
+          "targetGroups": [
+            {
+              "serviceName": "frontend-stable-service",
+              "servicePort": "80",
+              "weight": 90
+            },
+            {
+              "serviceName": "frontend-canary-service",
+              "servicePort": "80",
+              "weight": 10
+            }
+          ]
+        }
+      }
+
+    # User Service: 90% Stable, 10% Canary
+    alb.ingress.kubernetes.io/actions.user-weighted-service: >
+      {
+        "type": "forward",
+        "forwardConfig": {
+          "targetGroups": [
+            {
+              "serviceName": "user-service-stable-service",
+              "servicePort": "3001",
+              "weight": 90
+            },
+            {
+              "serviceName": "user-service-canary-service",
+              "servicePort": "3001",
+              "weight": 10
+            }
+          ]
+        }
+      }
+
+    # Search Service: 90% Stable, 10% Canary
+    alb.ingress.kubernetes.io/actions.search-weighted-service: >
+      {
+        "type": "forward",
+        "forwardConfig": {
+          "targetGroups": [
+            {
+              "serviceName": "search-service-stable-service",
+              "servicePort": "3002",
+              "weight": 90
+            },
+            {
+              "serviceName": "search-service-canary-service",
+              "servicePort": "3002",
+              "weight": 10
+            }
+          ]
+        }
+      }
+
+    # Booking Service: 90% Stable, 10% Canary
+    alb.ingress.kubernetes.io/actions.booking-weighted-service: >
+      {
+        "type": "forward",
+        "forwardConfig": {
+          "targetGroups": [
+            {
+              "serviceName": "booking-service-stable-service",
+              "servicePort": "3003",
+              "weight": 90
+            },
+            {
+              "serviceName": "booking-service-canary-service",
+              "servicePort": "3003",
+              "weight": 10
+            }
+          ]
+        }
+      }
+
+    # Payment Service: 90% Stable, 10% Canary
+    alb.ingress.kubernetes.io/actions.payment-weighted-service: >
+      {
+        "type": "forward",
+        "forwardConfig": {
+          "targetGroups": [
+            {
+              "serviceName": "payment-service-stable-service",
+              "servicePort": "3004",
+              "weight": 90
+            },
+            {
+              "serviceName": "payment-service-canary-service",
+              "servicePort": "3004",
+              "weight": 10
+            }
+          ]
+        }
+      }
+
+    # Notification Service: 90% Stable, 10% Canary
+    alb.ingress.kubernetes.io/actions.notification-weighted-service: >
+      {
+        "type": "forward",
+        "forwardConfig": {
+          "targetGroups": [
+            {
+              "serviceName": "notification-service-stable-service",
+              "servicePort": "3005",
+              "weight": 90
+            },
+            {
+              "serviceName": "notification-service-canary-service",
+              "servicePort": "3005",
+              "weight": 10
+            }
+          ]
+        }
+      }
+
 spec:
   ingressClassName: alb
   rules:
@@ -25,51 +146,51 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend-service
+                name: frontend-weighted-service
                 port:
-                  number: 80
+                  name: use-annotation
 
           # User service
           - path: /api/users
             pathType: Prefix
             backend:
               service:
-                name: user-service-service
+                name: user-weighted-service
                 port:
-                  number: 3001
+                  name: use-annotation
 
           # Search service
           - path: /api/search
             pathType: Prefix
             backend:
               service:
-                name: search-service-service
+                name: search-weighted-service
                 port:
-                  number: 3002
+                  name: use-annotation
 
           # Booking service
           - path: /api/bookings
             pathType: Prefix
             backend:
               service:
-                name: booking-service-service
+                name: booking-weighted-service
                 port:
-                  number: 3003
+                  name: use-annotation
 
           # Payment service
           - path: /api/payments
             pathType: Prefix
             backend:
               service:
-                name: payment-service-service
+                name: payment-weighted-service
                 port:
-                  number: 3004
+                  name: use-annotation
 
           # Notification service
           - path: /api/notifications
             pathType: Prefix
             backend:
               service:
-                name: notification-service-service
+                name: notification-weighted-service
                 port:
-                  number: 3005
+                  name: use-annotation

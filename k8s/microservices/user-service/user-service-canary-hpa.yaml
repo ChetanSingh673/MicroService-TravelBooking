@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: frontend-autoscaler
+  name: user-service-canary-hpa
   namespace: travel-booking
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: frontend-deployment
+    name: user-service-canary-deployment
   minReplicas: 1
   maxReplicas: 3
   metrics:

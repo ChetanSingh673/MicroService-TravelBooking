@@ -1,59 +1,59 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment-service-deployment
+  name: user-service-stable-deployment
   namespace: travel-booking
   labels:
-    app: payment-service
+    app: user-service
     version: stable
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: payment-service
+      app: user-service
       version: stable
-  template:  
+  template:
     metadata:
       labels:
-        app: payment-service
+        app: user-service
         version: stable
     spec:
       containers:
-        - name: payment-service
-          image: chetansingh673/travel-payment-service:build-1
+        - name: user-service
+          image: chetansingh673/travel-user-service:build-1
           imagePullPolicy: Always
           ports:
-            - containerPort: 3004
+            - containerPort: 3001
 
           resources:
             requests:
               cpu: 100m
               memory: 128Mi
-
             limits:
               cpu: 500m
-              memory: 512Mi 
+              memory: 512Mi
 
           livenessProbe:
             httpGet:
               path: /health
-              port: 3004
+              port: 3001
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3  
+            failureThreshold: 3
 
-          readinessProbe: 
+          readinessProbe:
             httpGet:
               path: /health
-              port: 3004
+              port: 3001
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 3
-            failureThreshold: 3    
+            failureThreshold: 3
 
           envFrom:
             - configMapRef:
-                name: payment-service-config
+                name: user-service-config
             - secretRef:
-                name: payment-service-secret          
+                name: user-service-secret

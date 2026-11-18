@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: search-service-autoscaler
+  name: frontend-stable-hpa
   namespace: travel-booking
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: search-service-deployment
+    name: frontend-stable-deployment
   minReplicas: 1
   maxReplicas: 3
   metrics:
