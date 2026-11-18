@@ -9,6 +9,9 @@ metadata:
     alb.ingress.kubernetes.io/group.name: travel-booking-shared
     alb.ingress.kubernetes.io/group.order: '-100'
 
+    # Use IP target mode for ClusterIP services
+    alb.ingress.kubernetes.io/target-type: ip
+
 spec:
   ingressClassName: alb
   rules:
