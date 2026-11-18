@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: booking-service 
-          image: chetansingh673/travel-booking-service:build-1
+          image: chetansingh673/travel-booking-service:v1-build-1
           imagePullPolicy: Always
           ports:
             - containerPort: 3003
