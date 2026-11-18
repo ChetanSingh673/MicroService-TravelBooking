@@ -1,170 +1,87 @@
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: travel-booking-ingress
   namespace: travel-booking
   annotations:
-    # ADDED: Share the ALB with the monitoring Ingress
+    # Shared ALB configuration
     alb.ingress.kubernetes.io/group.name: travel-booking-shared
     alb.ingress.kubernetes.io/group.order: '0'
-     
     alb.ingress.kubernetes.io/load-balancer-name: travel-booking-alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+
+    # HTTPS configuration
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:607416643673:certificate/ed134b5a-b12f-441b-b3d8-2dfa487e6030
 
-    # Frontend: 90% Stable, 10% Canary
+    # Frontend weighted routing: 90% stable, 10% canary
     alb.ingress.kubernetes.io/actions.frontend-weighted-service: >
-      {
-        "type": "forward",
-        "forwardConfig": {
-          "targetGroups": [
-            {
-              "serviceName": "frontend-stable-service",
-              "servicePort": "80",
-              "weight": 90
-            },
-            {
-              "serviceName": "frontend-canary-service",
-              "servicePort": "80",
-              "weight": 10
-            }
-          ]
-        }
-      }
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"frontend-stable-service","servicePort":"80","weight":90},{"serviceName":"frontend-canary-service","servicePort":"80","weight":10}]}}
 
-    # User Service: 90% Stable, 10% Canary
+    # User service weighted routing
     alb.ingress.kubernetes.io/actions.user-weighted-service: >
-      {
-        "type": "forward",
-        "forwardConfig": {
-          "targetGroups": [
-            {
-              "serviceName": "user-service-stable-service",
-              "servicePort": "3001",
-              "weight": 90
-            },
-            {
-              "serviceName": "user-service-canary-service",
-              "servicePort": "3001",
-              "weight": 10
-            }
-          ]
-        }
-      }
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"user-service-stable-service","servicePort":"3001","weight":90},{"serviceName":"user-service-canary-service","servicePort":"3001","weight":10}]}}
 
-    # Search Service: 90% Stable, 10% Canary
+    # Search service weighted routing
     alb.ingress.kubernetes.io/actions.search-weighted-service: >
-      {
-        "type": "forward",
-        "forwardConfig": {
-          "targetGroups": [
-            {
-              "serviceName": "search-service-stable-service",
-              "servicePort": "3002",
-              "weight": 90
-            },
-            {
-              "serviceName": "search-service-canary-service",
-              "servicePort": "3002",
-              "weight": 10
-            }
-          ]
-        }
-      }
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"search-service-stable-service","servicePort":"3002","weight":90},{"serviceName":"search-service-canary-service","servicePort":"3002","weight":10}]}}
 
-    # Booking Service: 90% Stable, 10% Canary
+    # Booking service weighted routing
     alb.ingress.kubernetes.io/actions.booking-weighted-service: >
-      {
-        "type": "forward",
-        "forwardConfig": {
-          "targetGroups": [
-            {
-              "serviceName": "booking-service-stable-service",
-              "servicePort": "3003",
-              "weight": 90
-            },
-            {
-              "serviceName": "booking-service-canary-service",
-              "servicePort": "3003",
-              "weight": 10
-            }
-          ]
-        }
-      }
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"booking-service-stable-service","servicePort":"3003","weight":90},{"serviceName":"booking-service-canary-service","servicePort":"3003","weight":10}]}}
 
-    # Payment Service: 90% Stable, 10% Canary
+    # Payment service weighted routing
     alb.ingress.kubernetes.io/actions.payment-weighted-service: >
-      {
-        "type": "forward",
-        "forwardConfig": {
-          "targetGroups": [
-            {
-              "serviceName": "payment-service-stable-service",
-              "servicePort": "3004",
-              "weight": 90
-            },
-            {
-              "serviceName": "payment-service-canary-service",
-              "servicePort": "3004",
-              "weight": 10
-            }
-          ]
-        }
-      }
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"payment-service-stable-service","servicePort":"3004","weight":90},{"serviceName":"payment-service-canary-service","servicePort":"3004","weight":10}]}}
 
-    # Notification Service: 90% Stable, 10% Canary
+    # Notification service weighted routing
     alb.ingress.kubernetes.io/actions.notification-weighted-service: >
-      {
-        "type": "forward",
-        "forwardConfig": {
-          "targetGroups": [
-            {
-              "serviceName": "notification-service-stable-service",
-              "servicePort": "3005",
-              "weight": 90
-            },
-            {
-              "serviceName": "notification-service-canary-service",
-              "servicePort": "3005",
-              "weight": 10
-            }
-          ]
-        }
-      }
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"notification-service-stable-service","servicePort":"3005","weight":90},{"serviceName":"notification-service-canary-service","servicePort":"3005","weight":10}]}}
 
 spec:
   ingressClassName: alb
+
   rules:
     - host: cloudmella.store
       http:
         paths:
-          # Frontend
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend-weighted-service
-                port:
-                  name: use-annotation
 
-          # User service
-          - path: /api/users
+          # Grafana
+          - path: /grafana
             pathType: Prefix
             backend:
               service:
-                name: user-weighted-service
+                name: monitoring-grafana
                 port:
-                  name: use-annotation
+                  number: 80
 
-          # Search service
-          - path: /api/search
+          # Prometheus
+          - path: /prometheus
             pathType: Prefix
             backend:
               service:
-                name: search-weighted-service
+                name: monitoring-kube-prometheus-prometheus
+                port:
+                  number: 9090
+
+          # Alertmanager
+          - path: /alertmanager
+            pathType: Prefix
+            backend:
+              service:
+                name: monitoring-kube-prometheus-alertmanager
+                port:
+                  number: 9093
+
+          # Notification service
+          - path: /api/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: notification-weighted-service
                 port:
                   name: use-annotation
 
@@ -186,11 +103,29 @@ spec:
                 port:
                   name: use-annotation
 
-          # Notification service
-          - path: /api/notifications
+          # Search service
+          - path: /api/search
             pathType: Prefix
             backend:
               service:
-                name: notification-weighted-service
+                name: search-weighted-service
+                port:
+                  name: use-annotation
+
+          # User service
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-weighted-service
+                port:
+                  name: use-annotation
+
+          # Frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-weighted-service
                 port:
                   name: use-annotation
