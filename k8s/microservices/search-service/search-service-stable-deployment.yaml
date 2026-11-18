@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: search-service
-          image: chetansingh673/travel-search-service:build-1
+          image: chetansingh673/travel-search-service:v1-build-1
           imagePullPolicy: Always
           ports:
             - containerPort: 3002
