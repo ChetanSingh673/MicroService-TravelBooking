@@ -1,0 +1,268 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: travelbooking-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+    release: monitoring
+data:
+  travelbooking-dashboard.json: |
+    {
+      "uid": "travelbooking-monitoring",
+      "title": "TravelBooking - Stable vs Canary Monitoring",
+      "tags": ["travelbooking", "blackbox", "canary"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Availability - Stable vs Canary",
+          "type": "timeseries",
+          "description": "HTTP probe success percentage over the last 5 minutes.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "fillOpacity": 15,
+                "showPoints": "never"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(label_replace(avg by (job) (avg_over_time(probe_success{job=~\"travelbooking-.*\"}[5m])) * 100, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "legendFormat": "{{service}} - {{version}}",
+              "range": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Response Time - Stable vs Canary",
+          "type": "timeseries",
+          "description": "Average Blackbox probe duration over the last 5 minutes, in milliseconds.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "min": 0,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(label_replace(avg by (job) (avg_over_time(probe_duration_seconds{job=~\"travelbooking-.*\"}[5m])) * 1000, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "legendFormat": "{{service}} - {{version}}",
+              "range": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "HTTP Status Codes - All Services",
+          "type": "table",
+          "description": "Latest HTTP status code returned by each stable and canary endpoint.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                }
+              },
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "200": {
+                      "text": "200 OK",
+                      "color": "green"
+                    },
+                    "404": {
+                      "text": "404 Not Found",
+                      "color": "orange"
+                    },
+                    "500": {
+                      "text": "500 Server Error",
+                      "color": "red"
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "md",
+            "footer": {
+              "show": false
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(label_replace(probe_http_status_code{job=~\"travelbooking-.*\"}, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "legendFormat": "{{service}} - {{version}}",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Availability Comparison - Last 15 Minutes",
+          "type": "table",
+          "description": "Percentage of successful probes during the previous 15 minutes.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 9
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "color-background"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 95
+                  },
+                  {
+                    "color": "green",
+                    "value": 99
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "md",
+            "footer": {
+              "show": false
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "label_replace(label_replace(avg_over_time(probe_success{job=~\"travelbooking-.*\"}[15m]) * 100, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "legendFormat": "{{service}} - {{version}}",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ]
+        }
+      ],
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "links": []
+    }
