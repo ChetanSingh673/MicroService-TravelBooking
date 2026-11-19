@@ -13,7 +13,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:607416643673:certificate/ed134b5a-b12f-441b-b3d8-2dfa487e6030
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:607416643673:certificate/db89fd48-0c3d-430f-b7d3-7ebf9eb76777
 
     # Frontend: 90% Stable, 10% Canary
     alb.ingress.kubernetes.io/actions.frontend-weighted-service: >
