@@ -681,6 +681,18 @@ kubectl create namespace monitoring
 ```bash
 helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring
 ```
+OR
+```bash
+helm install monitoring prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set 'grafana.grafana\.ini.server.root_url=https://cloudmella.store/grafana/' \
+  --set 'grafana.grafana\.ini.server.serve_from_sub_path=true' \
+  --set prometheus.prometheusSpec.externalUrl=https://cloudmella.store/prometheus/ \
+  --set prometheus.prometheusSpec.routePrefix=/prometheus \
+  --set alertmanager.alertmanagerSpec.externalUrl=https://cloudmella.store/alertmanager/ \
+  --set alertmanager.alertmanagerSpec.routePrefix=/alertmanager \
+  --wait
+```
 
 ```bash
 helm pull prometheus-community/kube-prometheus-stack --untar
