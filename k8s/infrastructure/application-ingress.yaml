@@ -24,12 +24,12 @@ metadata:
             {
               "serviceName": "frontend-stable-service",
               "servicePort": "80",
-              "weight": 40
+              "weight": 0
             },
             {
               "serviceName": "frontend-canary-service",
               "servicePort": "80",
-              "weight": 60
+              "weight": 100
             }
           ]
         }
