@@ -8,8 +8,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: search-service-stable-deployment
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: 4
+  maxReplicas: 8
   metrics:
   - type: Resource
     resource:
