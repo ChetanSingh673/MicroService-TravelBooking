@@ -1,0 +1,251 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: frontend-stable
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-frontend-stable
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://frontend-stable-service.travel-booking.svc.cluster.local:80/
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: frontend-canary
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-frontend-canary
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://frontend-canary-service.travel-booking.svc.cluster.local:80/
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: user-stable
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-user-stable
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://user-service-stable-service.travel-booking.svc.cluster.local:3001/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: user-canary
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-user-canary
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://user-service-canary-service.travel-booking.svc.cluster.local:3001/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: search-stable
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-search-stable
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://search-service-stable-service.travel-booking.svc.cluster.local:3002/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: search-canary
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-search-canary
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://search-service-canary-service.travel-booking.svc.cluster.local:3002/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: booking-stable
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-booking-stable
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://booking-service-stable-service.travel-booking.svc.cluster.local:3003/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: booking-canary
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-booking-canary
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://booking-service-canary-service.travel-booking.svc.cluster.local:3003/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: payment-stable
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-payment-stable
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://payment-service-stable-service.travel-booking.svc.cluster.local:3004/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: payment-canary
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-payment-canary
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://payment-service-canary-service.travel-booking.svc.cluster.local:3004/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: notification-stable
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-notification-stable
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://notification-service-stable-service.travel-booking.svc.cluster.local:3005/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: notification-canary
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  jobName: travelbooking-notification-canary
+  interval: 30s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://notification-service-canary-service.travel-booking.svc.cluster.local:3005/health
