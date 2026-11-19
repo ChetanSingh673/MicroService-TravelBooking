@@ -150,8 +150,8 @@ const LoginPage = () => {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-black text-slate-900">Welcome back</h1>
-            <p className="text-slate-500 mt-1">Sign in to continue your journey</p>
+            <h1 className="text-3xl font-black text-slate-900">Welcome to TravelBooking v2.0</h1>
+            <p className="text-slate-500 mt-1">Your next adventure starts with a single sign-in!</p>
           </div>
 
           {serverError && (
