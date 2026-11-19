@@ -1,4 +1,3 @@
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,22 +10,48 @@ data:
   travelbooking-dashboard.json: |
     {
       "uid": "travelbooking-monitoring",
-      "title": "TravelBooking - Stable vs Canary Monitoring",
-      "tags": ["travelbooking", "blackbox", "canary"],
+      "title": "TravelBooking - Blackbox Exporter Monitoring",
+      "tags": [
+        "travelbooking",
+        "blackbox",
+        "stable",
+        "canary"
+      ],
       "timezone": "browser",
       "schemaVersion": 39,
-      "version": 1,
+      "version": 2,
       "refresh": "30s",
       "time": {
-        "from": "now-1h",
+        "from": "now-15m",
         "to": "now"
+      },
+      "templating": {
+        "list": [
+          {
+            "name": "service",
+            "label": "Service",
+            "type": "custom",
+            "query": "frontend,user,search,booking,payment,notification",
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "options": [],
+            "includeAll": true,
+            "allValue": ".*",
+            "multi": false,
+            "hide": 0,
+            "skipUrlSync": false
+          }
+        ]
       },
       "panels": [
         {
           "id": 1,
           "title": "Availability - Stable vs Canary",
           "type": "timeseries",
-          "description": "HTTP probe success percentage over the last 5 minutes.",
+          "description": "Successful HTTP probes as a percentage, averaged over 5 minutes.",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -66,7 +91,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "label_replace(label_replace(avg by (job) (avg_over_time(probe_success{job=~\"travelbooking-.*\"}[5m])) * 100, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "expr": "label_replace(label_replace(avg by (job) (avg_over_time(probe_success{job=~\"travelbooking-${service:regex}-.*\"}[5m])) * 100, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
               "legendFormat": "{{service}} - {{version}}",
               "range": true
             }
@@ -76,7 +101,7 @@ data:
           "id": 2,
           "title": "Response Time - Stable vs Canary",
           "type": "timeseries",
-          "description": "Average Blackbox probe duration over the last 5 minutes, in milliseconds.",
+          "description": "Average probe duration over 5 minutes, in milliseconds.",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
@@ -114,7 +139,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "label_replace(label_replace(avg by (job) (avg_over_time(probe_duration_seconds{job=~\"travelbooking-.*\"}[5m])) * 1000, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "expr": "label_replace(label_replace(avg by (job) (avg_over_time(probe_duration_seconds{job=~\"travelbooking-${service:regex}-.*\"}[5m])) * 1000, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
               "legendFormat": "{{service}} - {{version}}",
               "range": true
             }
@@ -122,15 +147,15 @@ data:
         },
         {
           "id": 3,
-          "title": "HTTP Status Codes - All Services",
+          "title": "HTTP Status Codes - Stable vs Canary",
           "type": "table",
-          "description": "Latest HTTP status code returned by each stable and canary endpoint.",
+          "description": "Latest HTTP status code returned by each selected stable and canary endpoint.",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
           "gridPos": {
-            "h": 9,
+            "h": 10,
             "w": 12,
             "x": 0,
             "y": 9
@@ -159,6 +184,10 @@ data:
                     "500": {
                       "text": "500 Server Error",
                       "color": "red"
+                    },
+                    "503": {
+                      "text": "503 Unavailable",
+                      "color": "red"
                     }
                   }
                 }
@@ -176,7 +205,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "label_replace(label_replace(probe_http_status_code{job=~\"travelbooking-.*\"}, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "expr": "label_replace(label_replace(probe_http_status_code{job=~\"travelbooking-${service:regex}-.*\"}, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
               "legendFormat": "{{service}} - {{version}}",
               "instant": true,
               "range": false,
@@ -188,13 +217,13 @@ data:
           "id": 4,
           "title": "Availability Comparison - Last 15 Minutes",
           "type": "table",
-          "description": "Percentage of successful probes during the previous 15 minutes.",
+          "description": "Percentage of successful probes during the selected 15-minute period.",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
           "gridPos": {
-            "h": 9,
+            "h": 10,
             "w": 12,
             "x": 12,
             "y": 9
@@ -240,7 +269,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "label_replace(label_replace(avg_over_time(probe_success{job=~\"travelbooking-.*\"}[15m]) * 100, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
+              "expr": "label_replace(label_replace(avg_over_time(probe_success{job=~\"travelbooking-${service:regex}-.*\"}[15m]) * 100, \"service\", \"$1\", \"job\", \"travelbooking-([^-]+)-.*\"), \"version\", \"$1\", \"job\", \".*-(stable|canary)$\")",
               "legendFormat": "{{service}} - {{version}}",
               "instant": true,
               "range": false,
